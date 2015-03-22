@@ -9,6 +9,20 @@
 #ifndef CPU_H_
 #define CPU_H_
 
+/**
+ * Estructura registro. Por medio de esta estructura de 16 bits puedo acceder
+ * a un registro virtual de 16 bits o a los dos registros de los que se 
+ * compone de forma simultánea.
+ *
+ * Por ejemplo, creando un union register_t para BC, puedo acceder a BC con
+ * bc.WORD, a B con bc.BYTES.H, y a C con bc.bytes.L.
+ */
+union register_t
+{
+    word WORD;
+    struct { byte L, H; } BYTES;
+};
+
 struct bank_t
 {
     byte a, f;
