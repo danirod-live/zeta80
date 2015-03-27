@@ -49,7 +49,7 @@ struct bank_t {
 
 struct cpu_t
 {
-    word mem[0x10000];          //< Memory
+    byte mem[0x10000];          //< Memory
 
     struct bank_t main;         //< Main Register Bank
     struct bank_t alternate;    //< Alternate Register Bank
