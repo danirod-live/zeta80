@@ -66,8 +66,13 @@ execute_opcode(struct cpu_t* cpu)
     extract_opcode(opcode, &opdata);
 
     // Procesar opcode.
-    table_function table = tables[(int) opdata.z];
-    table(cpu, &opdata);
+    // no se si por funcionalidad lo necesites asi.
+   
+    // - table_function table = tables[(int) opdata.z];
+    // - table(cpu, &opdata);
+   
+    // pero pienso que tambien podria hacerse asi:
+    tables[(int) opdata.z](cpu, &opdata);
 
     // Otras operaciones.
 }
