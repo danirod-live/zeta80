@@ -3,6 +3,10 @@ language: c
 compiler:
 - gcc
 
+before_install:
+- echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
+- sudo apt-get update -qq
+
 install:
 - sudo apt-get install cmake
 - sudo apt-get install check
