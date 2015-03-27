@@ -9,6 +9,10 @@
 #ifndef CPU_H_
 #define CPU_H_
 
+#define GET_FLAG(f, flag) ((f & flag) != 0)
+#define SET_FLAG(f, flag) (f = (f | flag))
+#define RESET_FLAG(f, flag) (f = (f & ~flag))
+
 /**
  * Flags del procesador.
  */
