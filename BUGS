@@ -1,0 +1,16 @@
+Reporting bugs.-
+
+PLEASE NOTE
+    This is an unstable project in an early development stage.
+    Project is active and things change often. Think twice
+    before reporting bugs at this stage as they are probably
+    being worked on anyway.
+
+    If you find a bug on the emulator, you can report it at the issue
+    tracker for this project, which is located on GitHub, at
+        
+        http://github.com/danirod/z80emu
+
+    Please, only report bugs that can be reproduced. Report the steps
+    required to reproduce the bug, as well as the environment (operating
+    system, processor) you are running the emulator in.

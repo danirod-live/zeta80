@@ -1,0 +1,23 @@
+Just give up at the moment. There is no proper way for installing this and
+if I were you I'd just download another Z80 library instead of using this.
+
+You can build libzeta80 as a static library using the following commands:
+
+	cmake ..
+	make
+	make install
+
+If you want to override default installation path you might run cmake as
+
+	cmake .. -DCMAKE_INSTALL_PREFIX=$mydir
+
+where $mydir is the desired location where you want the project to be
+installed. Please note that $mydir should be a root folder for other 
+directories such as $mydir/bin, $mydir/lib, $mydir/include... example
+locations are /usr, /usr/local... don't use a directory such as
+/usr/local/bin as your install directory, you will end up with things
+installed to /usr/local/bin/bin, /usr/local/bin/lib and so.
+
+This INSTALL file is definitely a draft. As the project grows I'll write
+some proper documentation when everything is ready to go.
+
