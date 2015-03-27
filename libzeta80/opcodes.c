@@ -16,8 +16,8 @@ nop(struct cpu_t* cpu)
 static void
 ex_af_af(struct cpu_t* cpu)
 {
-    Register* af = &cpu->main.af;
-    Register* af2 = &cpu->alternate.af;
+    union register_t* af = &cpu->main.af;
+    union register_t* af2 = &cpu->alternate.af;
     word tmp = af->WORD;
     af->WORD = af2->WORD;
     af2->WORD = tmp;
@@ -94,7 +94,7 @@ jr_c(struct cpu_t* cpu)
 }
 
 static void
-ld_dd_nn(struct cpu_t* cpu, Register* reg)
+ld_dd_nn(struct cpu_t* cpu, union register_t* reg)
 {
     // Read NN from memory. It's a 16 bit value.
     word nn = *(((word*) cpu->mem) + cpu->pc.WORD);
@@ -105,7 +105,7 @@ ld_dd_nn(struct cpu_t* cpu, Register* reg)
 }
 
 static void
-add_hl_ss(struct cpu_t* cpu, Register* reg)
+add_hl_ss(struct cpu_t* cpu, union register_t* reg)
 {
     word op1 = cpu->main.hl.WORD, op2 = reg->WORD;
 
@@ -155,7 +155,7 @@ extract_opcode(char opcode, struct opcode_t* opstruct)
  */
 typedef void (*table_function)(struct cpu_t*, struct opcode_t*);
 
-static Register* rp[4];
+static union register_t* rp[4];
 
 static void
 execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
