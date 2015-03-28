@@ -30,14 +30,19 @@
 # negligence or otherwise) arising in any way out of the use of this
 # software, even if advised of the possibility of such damage.
 
-project(zeta80)
-cmake_minimum_required(VERSION 2.8)
+# Header files are on include/ folder.
+include_directories(${ZETA80_INCLUDE})
 
-# Include /cmake directory when looking for modules
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+# Source code files. If you add a new source code file, list it here.
+set(ZETA80_SOURCE_FILES
+    opcodes.c
+    )
 
-set(ZETA80_INCLUDE ${CMAKE_SOURCE_DIR}/include)
-set(ZETA80_SRC ${CMAKE_SOURCE_DIR}/src)
+# libzeta80 is a library. Build library using header and source files.
+add_library(zeta80 SHARED ${ZETA80_SOURCE_FILES})
 
-add_subdirectory(src)
-add_subdirectory(tests)
+# Install library and all header files.
+install(TARGETS zeta80 DESTINATION lib)
+install(DIRECTORY ${ZETA80_INCLUDE}
+    DESTINATION include/zeta80
+    FILES_MATCHING PATTERN "*.h")

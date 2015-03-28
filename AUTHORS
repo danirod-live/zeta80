@@ -1,4 +1,4 @@
-z80emu is just another implementation of a Z80 emulator.
+zeta80 is an emulation library that emulates a Z80 CPU.
 
 Main Author and Maintainer:
     Dani Rodríguez <danirod@outlook.com>
