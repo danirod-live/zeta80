@@ -3,10 +3,12 @@ include_directories(${z80_SOURCE_DIR}/libzeta80/include)
 set(tests_src
     zetatest.c
     cpu_test.c
+    opcodes_test.c
     )
 
 set(tests_inc
     cpu_test.h
+    opcodes_test.h
     )
 
 add_executable(zetatest ${tests_src} ${tests_inc})

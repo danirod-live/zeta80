@@ -1,18 +1,17 @@
 #include <check.h>
 
 #include "cpu_test.h"
+#include "opcodes_test.h"
 
 int
 main(int argc, char** argv)
 {
-    int failed_tests = 0;
+    SRunner* suite_runner = srunner_create(gensuite_cpu());
+    srunner_add_suite(suite_runner, gensuite_opcodes());
 
-    // Test CPU
-    Suite* cpu_suite = gensuite_cpu();
-    SRunner* cpu_runner = srunner_create(cpu_suite);
-    srunner_run_all(cpu_runner, CK_NORMAL);
-    failed_tests += srunner_ntests_failed(cpu_runner);
-    srunner_free(cpu_runner);
+    srunner_run_all(suite_runner, CK_NORMAL);
+    int failed = srunner_ntests_failed(suite_runner);
+    srunner_free(suite_runner);
 
-    return (failed_tests > 0);
+    return (failed > 0);
 }
