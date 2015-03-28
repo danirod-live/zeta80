@@ -1,17 +1,27 @@
-set(zeta80_cfiles
-    opcodes.c
+# CMakeLists.txt for libzeta80
+# Description: libzeta80 is the core library that emulates a Z80 CPU.
+# This CMakeLists describes how to properly build the library.
+
+# Header files are in include/ folder, source files are in src/ folder.
+include_directories(include)
+
+# Header files. If you create a new header file, don't forget to list it here.
+set(zeta_h
+    include/cpu.h
+    include/opcodes.h
+    include/types.h
     )
 
-set(zeta80_hfiles
-    cpu.h
-    opcodes.h
-    types.h
+# Source files. IF you create a new source file, don't forget to list it here.
+set(zeta_c
+    src/opcodes.c
     )
 
-add_library(zeta80 STATIC ${zeta80_cfiles} ${zeta80_hfiles})
+# libzeta80 is a library. Build library using header and source files.
+add_library(zeta80 SHARED ${zeta_c} ${zeta_h})
 
-target_include_directories(zeta80 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
+# This library can be globally installed onto your system so that you can
+# build your own software on top of this library. Copy library into lib/
+# and source files into include/.
 install(TARGETS zeta80 DESTINATION lib)
-install(FILES ${zeta80_hfiles} DESTINATION include/zeta80)
-
+install(FILES ${zeta_h} DESTINATION include/zeta80)
