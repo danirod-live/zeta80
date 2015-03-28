@@ -1,0 +1,6 @@
+# This is where CMake builds my project.
+build/
+
+# Unless required.
+.ycm_extra_conf.py
+.ycm_extra_conf.pyc
