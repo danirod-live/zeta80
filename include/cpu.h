@@ -1,7 +1,22 @@
 /*
- * libzeta80: A Z80 emulation library.
- * Copyright (C) 2015 Dani Rodríguez <danirod@outlook.com>
- * Insert BSD license here.
+ * This file is part of the zeta80 emulation library.
+ * Copyright (c) 2015, Dani Rodríguez
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ * * Redistributions of source code must retain the above copyright notice,
+ *   this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * 
+ * * Neither the name of the project's author nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
  */
 
 #include "types.h"
@@ -9,12 +24,17 @@
 #ifndef CPU_H_
 #define CPU_H_
 
+/** Check whether a flag is set or reset. */
 #define GET_FLAG(f, flag) ((f & flag) != 0)
+
+/** Set a given flag (turn the flag to 1). */
 #define SET_FLAG(f, flag) (f = (f | flag))
+
+/** Reset a given flag (turn the flag to 0). */
 #define RESET_FLAG(f, flag) (f = (f & ~flag))
 
 /**
- * Flags del procesador.
+ * CPU flags. These flags are located in F register.
  */
 enum flag_t
 {
@@ -29,12 +49,9 @@ enum flag_t
 };
 
 /**
- * Estructura registro. Por medio de esta estructura de 16 bits puedo acceder
- * a un registro virtual de 16 bits o a los dos registros de los que se 
- * compone de forma simultánea.
- *
- * Por ejemplo, creando un union register_t para BC, puedo acceder a BC con
- * bc.WORD, a B con bc.BYTES.H, y a C con bc.bytes.L.
+ * Register struct. This is a 16 bit structure that emulates a virtual
+ * 16 bit register. It allow access to the 16 bit virtual word or to each
+ * one of the two 8-bit registers that this struct is composed of.
  */
 union register_t
 {
@@ -43,14 +60,21 @@ union register_t
 };
 
 /**
- * Banco de registros. El Z80 tiene varios bancos de registros y para cada
- * banco tiene ocho registros de 8 bits que virtualmente pueden agruparse
- * en 4 registros virtuales de 16 bits.
+ * Register bank. Z80 has two register banks, each one is composed of eight
+ * 8-bit registers, A, F, B, C, D, E, H and L, organized into pairs that
+ * at the same time create four 16-bit virtual registers AF, BC, DE and HL.
  */
-struct bank_t {
-    union register_t bc, de, hl, af;
+struct bank_t
+{
+    union register_t af; //< AF register pair.
+    union register_t bc; //< BC register pair.
+    union register_t de; //< DE register pair
+    union register_t hl; //< HL register pair
 };
 
+/**
+ * CPU structure.
+ */
 struct cpu_t
 {
     byte mem[0x10000];          //< Memory
