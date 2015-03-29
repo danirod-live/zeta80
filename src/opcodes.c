@@ -118,7 +118,7 @@ static void
 ld_dd_nn(struct cpu_t* cpu, union register_t* reg)
 {
     // Read NN from memory. It's a 16 bit value.
-    word nn = *(((word*) cpu->mem) + cpu->pc.WORD);
+    word nn = (cpu->mem[cpu->pc.WORD]) | (cpu->mem[cpu->pc.WORD+1] << 8);
     cpu->pc.WORD += 2;
 
     reg->WORD = nn;
@@ -181,21 +181,18 @@ static union register_t* rp[4];
 static void
 execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
 {
-    char z = opstruct->z;
-    char y = opstruct->y;
-
-    if (z == 0)
+    if (opstruct->z == 0)
     {
-        if (y == 0) nop(cpu);
-        if (y == 1) ex_af_af(cpu);
-        if (y == 2) djnz_d(cpu);
-        if (y == 3) jr_d(cpu);
-        if (y == 4) jr_nz(cpu);
-        if (y == 5) jr_z(cpu);
-        if (y == 6) jr_nc(cpu);
-        if (y == 7) jr_c(cpu);
+        if (opstruct->y == 0) nop(cpu);
+        if (opstruct->y == 1) ex_af_af(cpu);
+        if (opstruct->y == 2) djnz_d(cpu);
+        if (opstruct->y == 3) jr_d(cpu);
+        if (opstruct->y == 4) jr_nz(cpu);
+        if (opstruct->y == 5) jr_z(cpu);
+        if (opstruct->y == 6) jr_nc(cpu);
+        if (opstruct->y == 7) jr_c(cpu);
     }
-    else if (z == 1)
+    else if (opstruct->z == 1)
     {
         if (opstruct->q == 0) ld_dd_nn(cpu, rp[(int) opstruct->p]);
         if (opstruct->q == 1) add_hl_ss(cpu, rp[(int) opstruct->p]);
@@ -241,7 +238,7 @@ execute_opcode(struct cpu_t* cpu)
     extract_opcode(opcode, &opdata);
 
     // Procesar opcode.
-    table_function table = tables[(int) opdata.z];
+    table_function table = tables[(int) opdata.x];
     table(cpu, &opdata);
 
     // Otras operaciones.

@@ -22,6 +22,8 @@
 #ifndef OPCODES_H_
 #define OPCODES_H_
 
+#include "cpu.h"
+
 /**
  * Decoded opcode struct.
  */
@@ -37,4 +39,5 @@ struct opcode_t
 
 void extract_opcode(char opcode, struct opcode_t* opstruct);
 
+void execute_opcode(struct cpu_t* cpu);
 #endif
