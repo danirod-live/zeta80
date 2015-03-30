@@ -20,13 +20,11 @@
  */
 
 #include <check.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>         // malloc, free
+#include <string.h>         // memset
 
 #include <cpu.h>
 #include <opcodes.h>
-#include <types.h>
 
 #include "opcodes_test.h"
 

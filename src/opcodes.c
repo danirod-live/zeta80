@@ -19,9 +19,8 @@
  *   this software without specific prior written permission.
  */
 
-#include "opcodes.h"
-#include "cpu.h"
-#include <stdio.h>
+#include <opcodes.h>
+#include <cpu.h>
 
 /**
  * Executes NOP. This opcode does nothing. It just refreshes memory.
