@@ -92,18 +92,5 @@ struct cpu_t
     int tstates;                //< T-State counter
 };
 
-inline byte reg_a(struct cpu_t* cpu) { return cpu->main.af.BYTES.H; }
-inline byte reg_f(struct cpu_t* cpu) { return cpu->main.af.BYTES.L; }
-inline byte reg_b(struct cpu_t* cpu) { return cpu->main.bc.BYTES.H; }
-inline byte reg_c(struct cpu_t* cpu) { return cpu->main.bc.BYTES.L; }
-inline byte reg_d(struct cpu_t* cpu) { return cpu->main.de.BYTES.H; }
-inline byte reg_e(struct cpu_t* cpu) { return cpu->main.de.BYTES.L; }
-inline byte reg_h(struct cpu_t* cpu) { return cpu->main.hl.BYTES.H; }
-inline byte reg_l(struct cpu_t* cpu) { return cpu->main.hl.BYTES.L; }
-
-inline word reg_af(struct cpu_t* cpu) { return cpu->main.af.WORD; }
-inline word reg_bc(struct cpu_t* cpu) { return cpu->main.bc.WORD; }
-inline word reg_de(struct cpu_t* cpu) { return cpu->main.de.WORD; }
-inline word reg_hl(struct cpu_t* cpu) { return cpu->main.hl.WORD; }
 
 #endif 
