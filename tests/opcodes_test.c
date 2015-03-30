@@ -27,6 +27,8 @@
 #include "opcodes.h"
 #include "types.h"
 
+#include "opcodes_test/extract_opcodes.h"
+
 struct cpu_t*
 setup_cpu(void)
 {
@@ -44,71 +46,6 @@ teardown_cpu(struct cpu_t* cpu)
 {
     free(cpu);
 }
-
-/* Testcase for extract_opcode. Tests extration for X field. */
-START_TEST(extract_opcode_test_x)
-{
-    struct opcode_t opstr;
-    extract_opcode(0xC0, &opstr);
-    ck_assert(opstr.x == 3);
-    ck_assert(opstr.y == 0);
-    ck_assert(opstr.z == 0);
-    ck_assert(opstr.p == 0);
-    ck_assert(opstr.q == 0);
-}
-END_TEST
-
-/* Testcase for extract_opcode. Tests extraction for Y field. */
-START_TEST(extract_opcode_test_y)
-{
-    struct opcode_t opstr;
-    extract_opcode(0x38, &opstr);
-    ck_assert(opstr.x == 0);
-    ck_assert(opstr.y == 7);
-    ck_assert(opstr.z == 0);
-    ck_assert(opstr.p == 3);
-    ck_assert(opstr.q == 1);
-}
-END_TEST
-
-/* Testcase for extract_opcode. Tests extraction for Z field. */
-START_TEST(extract_opcode_test_z)
-{
-    struct opcode_t opstr;
-    extract_opcode(0x07, &opstr);
-    ck_assert(opstr.x == 0);
-    ck_assert(opstr.y == 0);
-    ck_assert(opstr.z == 7);
-    ck_assert(opstr.p == 0);
-    ck_assert(opstr.q == 0);
-}
-END_TEST
-
-/* Testcase for extract_opcode. Tests extraction for P field. */
-START_TEST(extract_opcode_test_p)
-{
-    struct opcode_t opstr;
-    extract_opcode(0x30, &opstr);
-    ck_assert(opstr.x == 0);
-    ck_assert(opstr.y == 6);
-    ck_assert(opstr.z == 0);
-    ck_assert(opstr.p == 3);
-    ck_assert(opstr.q == 0);
-}
-END_TEST
-
-/* Testcase for extract_opcode. Tests extraction for Q field. */
-START_TEST(extract_opcode_test_q)
-{
-    struct opcode_t opstr;
-    extract_opcode(0x08, &opstr);
-    ck_assert(opstr.x == 0);
-    ck_assert(opstr.y == 1);
-    ck_assert(opstr.z == 0);
-    ck_assert(opstr.p == 0);
-    ck_assert(opstr.q == 1);
-}
-END_TEST
 
 /* Testcase for NOP instruction. */
 START_TEST(nop_test)
@@ -698,13 +635,7 @@ END_TEST
 Suite*
 gensuite_opcodes(void)
 {
-    TCase* extract_opcode_test = tcase_create("extract_opcode");
-    tcase_add_test(extract_opcode_test, extract_opcode_test_x);
-    tcase_add_test(extract_opcode_test, extract_opcode_test_y);
-    tcase_add_test(extract_opcode_test, extract_opcode_test_z);
-    tcase_add_test(extract_opcode_test, extract_opcode_test_p);
-    tcase_add_test(extract_opcode_test, extract_opcode_test_q);
-
+    TCase* extract_opcodes_tcase = gen_extract_opcode_tcase();
     TCase* opcodes_test = tcase_create("opcodes");
     tcase_add_test(opcodes_test, nop_test);
     tcase_add_test(opcodes_test, ex_af_af_test);
@@ -732,7 +663,7 @@ gensuite_opcodes(void)
     tcase_add_test(opcodes_test, ld_a_nni_test);
 
     Suite* s = suite_create("Opcodes");
-    suite_add_tcase(s, extract_opcode_test);
+    suite_add_tcase(s, extract_opcodes_tcase);
     suite_add_tcase(s, opcodes_test);
     return s;
 }
