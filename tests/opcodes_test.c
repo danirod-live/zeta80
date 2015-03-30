@@ -23,11 +23,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cpu.h"
-#include "opcodes.h"
-#include "types.h"
 
-#include "opcodes_test/extract_opcodes.h"
+#include <cpu.h>
+#include <opcodes.h>
+#include <types.h>
+
+#include "opcodes_test.h"
 
 struct cpu_t*
 setup_cpu(void)
@@ -46,185 +47,6 @@ teardown_cpu(struct cpu_t* cpu)
 {
     free(cpu);
 }
-
-/* Testcase for NOP instruction. */
-START_TEST(nop_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x00; // NOP
-
-    execute_opcode(cpu);
-    ck_assert(cpu->tstates == 4);
-    teardown_cpu(cpu);
-}
-END_TEST
-
-/* Testcase for EX AF, AF' instruction. */
-START_TEST(ex_af_af_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->main.af.WORD = 0x1234;
-    cpu->alternate.af.WORD = 0x5678;
-    cpu->mem[0] = 0x08; // Opcode for EX AF, AF'
-    execute_opcode(cpu);
-    ck_assert(cpu->tstates == 4);
-    ck_assert(cpu->main.af.WORD == 0x5678);
-    ck_assert(cpu->alternate.af.WORD == 0x1234);
-    teardown_cpu(cpu);
-}
-END_TEST
-
-/* Testcase for DJNZ D instruction. */
-START_TEST(djnz_d_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x10; // DJNZ opcode
-    cpu->mem[1] = 0x05; // 05h -> jump 5 bytes.
-
-    // Set B <= 2 -> The CPU MUST jump.
-    cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    cpu->main.bc.BYTES.H = 2;
-    execute_opcode(cpu);
-    ck_assert(cpu->main.bc.BYTES.H == 1);
-    ck_assert(cpu->pc.WORD == 7);
-    ck_assert(cpu->tstates = 13);
-
-    // Set B <= 1 -> The CPU must NOT jump
-    cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    cpu->main.bc.BYTES.H = 1;
-    execute_opcode(cpu);
-    ck_assert(cpu->main.bc.BYTES.H == 0);
-    ck_assert(cpu->pc.WORD == 2);
-    ck_assert(cpu->tstates = 8);
-
-    teardown_cpu(cpu);
-}
-END_TEST
-
-/* Testcase for JR D instruction. */
-START_TEST(jr_d_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x18; // JR opcode
-    cpu->mem[1] = 0x05; // 05h -> jump 5 bytes
-
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7); // 2 + 5
-    ck_assert(cpu->tstates == 12);
-
-    teardown_cpu(cpu);
-}
-END_TEST
-
-/* Testcase for JR NZ, D instruction. */
-START_TEST(jr_nz_d_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x20; // JR NZ opcode
-    cpu->mem[1] = 0x05; // 05h -> jump 5 bytes
-
-    // Reset zero flag: CPU MUST jump.
-    cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
-    ck_assert(cpu->tstates == 12);
-
-    // Set zero flag: CPU must NOT jump.
-    cpu->pc.WORD = 0;
-    cpu->tstates = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
-    ck_assert(cpu->tstates == 7);
-
-    teardown_cpu(cpu);
-}
-END_TEST
-
-/* Testcase for JR Z, D instruction. */
-START_TEST(jr_z_d_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x28; // JR Z opcode
-    cpu->mem[1] = 0x05; // 05h -> jump 5 bytes
-
-    // Reset zero flag: CPU must NOT jump.
-    cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
-    ck_assert(cpu->tstates == 7);
-
-    // Set zero flag: CPU MUST jump.
-    cpu->pc.WORD = 0;
-    cpu->tstates = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
-    ck_assert(cpu->tstates == 12);
-
-    teardown_cpu(cpu);
-}
-END_TEST
-
-/* Testcase for JR NC, D instruction. */
-START_TEST(jr_nc_d_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x30; // Opcode for JR NC
-    cpu->mem[1] = 0x05; // 05h -> jump 5 bytes
-
-    // Reset carry flag: CPU MUST jump.
-    cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
-    ck_assert(cpu->tstates == 12);
-
-    // Set carry flag: CPU must NOT jump.
-    cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
-    ck_assert(cpu->tstates == 7);
-
-    teardown_cpu(cpu);
-}
-END_TEST
-
-/* Testcase for JR C, D instruction. */
-START_TEST(jr_c_d_test)
-{
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x38; // Opcode for JR C
-    cpu->mem[1] = 0x05; // 05h -> jump 5 bytes
-
-    // Reset carry flag: CPU must NOT jump
-    cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
-    ck_assert(cpu->tstates == 7);
-
-    // Set carry flag: CPU MUST jump
-    cpu->pc.WORD = 0;
-    cpu->tstates = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
-    ck_assert(cpu->tstates == 12);
-
-    teardown_cpu(cpu);
-}
-END_TEST
 
 /* Testcase for LD BC, NN instruction. */
 START_TEST(ld_bc_nn_test)
@@ -636,15 +458,9 @@ Suite*
 gensuite_opcodes(void)
 {
     TCase* extract_opcodes_tcase = gen_extract_opcode_tcase();
+    TCase* x0_z0_tcase = gen_x0_z0_tcase();
+
     TCase* opcodes_test = tcase_create("opcodes");
-    tcase_add_test(opcodes_test, nop_test);
-    tcase_add_test(opcodes_test, ex_af_af_test);
-    tcase_add_test(opcodes_test, djnz_d_test);
-    tcase_add_test(opcodes_test, jr_d_test);
-    tcase_add_test(opcodes_test, jr_nz_d_test);
-    tcase_add_test(opcodes_test, jr_z_d_test);
-    tcase_add_test(opcodes_test, jr_nc_d_test);
-    tcase_add_test(opcodes_test, jr_c_d_test);
     tcase_add_test(opcodes_test, ld_bc_nn_test);
     tcase_add_test(opcodes_test, ld_de_nn_test);
     tcase_add_test(opcodes_test, ld_hl_nn_test);
@@ -664,6 +480,7 @@ gensuite_opcodes(void)
 
     Suite* s = suite_create("Opcodes");
     suite_add_tcase(s, extract_opcodes_tcase);
+    suite_add_tcase(s, x0_z0_tcase);
     suite_add_tcase(s, opcodes_test);
     return s;
 }

@@ -41,12 +41,12 @@ set(ZETA80_TEST_SRC
     cpu_test.c
     opcodes_test.c
     opcodes_test/extract_opcodes.c
+    opcodes_test/x0_z0.c
     )
 
 set(ZETA80_TEST_INCLUDE
     cpu_test.h
     opcodes_test.h
-    opcodes_test/extract_opcodes.h
     )
 
 # Generate test program using Check.

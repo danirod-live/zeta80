@@ -23,7 +23,7 @@
 
 #include <opcodes.h>
 
-#include "extract_opcodes.h"
+#include "../opcodes_test.h" // Testcase definitions.
 
 /* Testcase for extract_opcode. Tests extration for X field. */
 START_TEST(extract_opcode_test_x)

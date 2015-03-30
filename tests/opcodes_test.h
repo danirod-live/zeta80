@@ -24,10 +24,17 @@
 
 #include <check.h>
 
-struct cpu_t* setup_cpu(void);
+#include <cpu.h>
 
+// Setup and teardown functions for test cases.
+struct cpu_t* setup_cpu(void);
 void teardown_cpu(struct cpu_t* cpu);
 
+// Different suites
 Suite* gensuite_opcodes(void);
+
+// Different test cases.
+TCase* gen_extract_opcode_tcase(void);
+TCase* gen_x0_z0_tcase(void);
 
 #endif // OPCODES_TEST_H_

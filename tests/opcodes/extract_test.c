@@ -21,9 +21,11 @@
 
 #include <check.h>
 
-#ifndef EXTRACT_OPCODES_TEST_H
-#define EXTRACT_OPCODES_TEST_H
+#include "../opcodes_test.h"
+#include "extract_test.h"
 
-TCase* gen_extract_opcode_tcase(void);
+/* Generate test case for extracting opcodes. */
+TCase* extract_tcase()
+{
 
-#endif // EXTRACT_OPCODES_TEST_H
+}
