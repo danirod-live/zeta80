@@ -35,7 +35,7 @@ START_TEST(ld_bc_nn_test)
     cpu->mem[2] = 0x12; // 0x12..
 
     execute_opcode(cpu);
-    ck_assert(cpu->main.bc.WORD == 0x1234);
+    ck_assert(REG_BC(*cpu) == 0x1234);
     ck_assert(cpu->tstates == 10);
     teardown_cpu(cpu);
 }
@@ -50,7 +50,7 @@ START_TEST(ld_de_nn_test)
     cpu->mem[2] = 0x12; // 0x12..
 
     execute_opcode(cpu);
-    ck_assert(cpu->main.de.WORD == 0x1234);
+    ck_assert(REG_DE(*cpu) == 0x1234);
     ck_assert(cpu->tstates == 10);
     teardown_cpu(cpu);
 }
@@ -65,7 +65,7 @@ START_TEST(ld_hl_nn_test)
     cpu->mem[2] = 0x12; // 0x12..
 
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1234);
+    ck_assert(REG_HL(*cpu) == 0x1234);
     ck_assert(cpu->tstates == 10);
     teardown_cpu(cpu);
 }
@@ -80,7 +80,7 @@ START_TEST(ld_sp_nn_test)
     cpu->mem[2] = 0x12; // 0x12..
 
     execute_opcode(cpu);
-    ck_assert(cpu->sp.WORD == 0x1234);
+    ck_assert(SP(*cpu) == 0x1234);
     ck_assert(cpu->tstates == 10);
     teardown_cpu(cpu);
 }
@@ -92,48 +92,48 @@ START_TEST(add_hl_bc_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x09; // ADD HL, BC
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x4242;
-    cpu->main.bc.WORD = 0x1111;
+    REG_HL(*cpu) = 0x4242;
+    REG_BC(*cpu) = 0x1111;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x5353);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x5353);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x0800;
-    cpu->main.bc.WORD = 0x0800;
+    REG_HL(*cpu) = 0x0800;
+    REG_BC(*cpu) = 0x0800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8000;
-    cpu->main.bc.WORD = 0x8000;
+    REG_HL(*cpu) = 0x8000;
+    REG_BC(*cpu) = 0x8000;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x0000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x0000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8800;
-    cpu->main.bc.WORD = 0x8800;
+    REG_HL(*cpu) = 0x8800;
+    REG_BC(*cpu) = 0x8800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
     teardown_cpu(cpu);
@@ -146,48 +146,48 @@ START_TEST(add_hl_de_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x19; // ADD HL, DE
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x4242;
-    cpu->main.de.WORD = 0x1111;
+    REG_HL(*cpu) = 0x4242;
+    REG_DE(*cpu) = 0x1111;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x5353);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x5353);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x0800;
-    cpu->main.de.WORD = 0x0800;
+    REG_HL(*cpu) = 0x0800;
+    REG_DE(*cpu) = 0x0800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8000;
-    cpu->main.de.WORD = 0x8000;
+    REG_HL(*cpu) = 0x8000;
+    REG_DE(*cpu) = 0x8000;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x0000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x0000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8800;
-    cpu->main.de.WORD = 0x8800;
+    REG_HL(*cpu) = 0x8800;
+    REG_DE(*cpu) = 0x8800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
     teardown_cpu(cpu);
@@ -200,44 +200,44 @@ START_TEST(add_hl_hl_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x29; // ADD HL, HL
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x4242;
+    REG_HL(*cpu) = 0x4242;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x8484);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x8484);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x0800;
+    REG_HL(*cpu) = 0x0800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8000;
+    REG_HL(*cpu) = 0x8000;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x0000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x0000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8800;
+    REG_HL(*cpu) = 0x8800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
     teardown_cpu(cpu);
@@ -250,48 +250,48 @@ START_TEST(add_hl_sp_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x39; // ADD HL, SP
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x4242;
-    cpu->sp.WORD = 0x1111;
+    REG_HL(*cpu) = 0x4242;
+    SP(*cpu) = 0x1111;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x5353);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x5353);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x0800;
-    cpu->sp.WORD = 0x0800;
+    REG_HL(*cpu) = 0x0800;
+    SP(*cpu) = 0x0800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8000;
-    cpu->sp.WORD = 0x8000;
+    REG_HL(*cpu) = 0x8000;
+    SP(*cpu) = 0x8000;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x0000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 0);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x0000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    cpu->main.hl.WORD = 0x8800;
-    cpu->sp.WORD = 0x8800;
+    REG_HL(*cpu) = 0x8800;
+    SP(*cpu) = 0x8800;
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1000);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_H) == 1);
-    ck_assert(GET_FLAG(cpu->main.af.BYTES.L, FLAG_N) == 0);
+    ck_assert(REG_HL(*cpu) == 0x1000);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     ck_assert(cpu->tstates == 11);
 
     teardown_cpu(cpu);

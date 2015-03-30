@@ -35,7 +35,7 @@ setup_cpu(void)
 
     // See section 2.4 from The Undocumented Z80 Documented.
     memset(cpu, 0xFF, sizeof(struct cpu_t));
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
     return cpu;
 }

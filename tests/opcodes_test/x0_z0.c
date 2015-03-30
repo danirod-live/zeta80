@@ -42,13 +42,13 @@ END_TEST
 START_TEST(ex_af_af_test)
 {
     struct cpu_t* cpu = setup_cpu();
-    cpu->main.af.WORD = 0x1234;
-    cpu->alternate.af.WORD = 0x5678;
+    REG_AF(*cpu) = 0x1234;
+    ALT_AF(*cpu) = 0x5678;
     cpu->mem[0] = 0x08; // Opcode for EX AF, AF'
     execute_opcode(cpu);
     ck_assert(cpu->tstates == 4);
-    ck_assert(cpu->main.af.WORD == 0x5678);
-    ck_assert(cpu->alternate.af.WORD == 0x1234);
+    ck_assert(REG_AF(*cpu) == 0x5678);
+    ck_assert(ALT_AF(*cpu) == 0x1234);
     teardown_cpu(cpu);
 }
 END_TEST
@@ -62,20 +62,20 @@ START_TEST(djnz_d_test)
 
     // Set B <= 2 -> The CPU MUST jump.
     cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    cpu->main.bc.BYTES.H = 2;
+    PC(*cpu) = 0;
+    REG_B(*cpu) = 2;
     execute_opcode(cpu);
-    ck_assert(cpu->main.bc.BYTES.H == 1);
-    ck_assert(cpu->pc.WORD == 7);
+    ck_assert(REG_B(*cpu) == 1);
+    ck_assert(PC(*cpu) == 7);
     ck_assert(cpu->tstates = 13);
 
     // Set B <= 1 -> The CPU must NOT jump
     cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    cpu->main.bc.BYTES.H = 1;
+    PC(*cpu) = 0;
+    REG_B(*cpu) = 1;
     execute_opcode(cpu);
-    ck_assert(cpu->main.bc.BYTES.H == 0);
-    ck_assert(cpu->pc.WORD == 2);
+    ck_assert(REG_B(*cpu) == 0);
+    ck_assert(PC(*cpu) == 2);
     ck_assert(cpu->tstates = 8);
 
     teardown_cpu(cpu);
@@ -90,7 +90,7 @@ START_TEST(jr_d_test)
     cpu->mem[1] = 0x05; // 05h -> jump 5 bytes
 
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7); // 2 + 5
+    ck_assert(PC(*cpu) == 7); // 2 + 5
     ck_assert(cpu->tstates == 12);
 
     teardown_cpu(cpu);
@@ -106,18 +106,18 @@ START_TEST(jr_nz_d_test)
 
     // Reset zero flag: CPU MUST jump.
     cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
+    PC(*cpu) = 0;
+    RESET_FLAG(REG_F(*cpu), FLAG_Z);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
+    ck_assert(PC(*cpu) == 7);
     ck_assert(cpu->tstates == 12);
 
     // Set zero flag: CPU must NOT jump.
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
+    SET_FLAG(REG_F(*cpu), FLAG_Z);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
+    ck_assert(PC(*cpu) == 2);
     ck_assert(cpu->tstates == 7);
 
     teardown_cpu(cpu);
@@ -133,18 +133,18 @@ START_TEST(jr_z_d_test)
 
     // Reset zero flag: CPU must NOT jump.
     cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
+    PC(*cpu) = 0;
+    RESET_FLAG(REG_F(*cpu), FLAG_Z);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
+    ck_assert(PC(*cpu) == 2);
     ck_assert(cpu->tstates == 7);
 
     // Set zero flag: CPU MUST jump.
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_Z);
+    SET_FLAG(REG_F(*cpu), FLAG_Z);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
+    ck_assert(PC(*cpu) == 7);
     ck_assert(cpu->tstates == 12);
 
     teardown_cpu(cpu);
@@ -160,18 +160,18 @@ START_TEST(jr_nc_d_test)
 
     // Reset carry flag: CPU MUST jump.
     cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
+    PC(*cpu) = 0;
+    RESET_FLAG(REG_F(*cpu), FLAG_C);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
+    ck_assert(PC(*cpu) == 7);
     ck_assert(cpu->tstates == 12);
 
     // Set carry flag: CPU must NOT jump.
     cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
+    PC(*cpu) = 0;
+    SET_FLAG(REG_F(*cpu), FLAG_C);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
+    ck_assert(PC(*cpu) == 2);
     ck_assert(cpu->tstates == 7);
 
     teardown_cpu(cpu);
@@ -187,18 +187,18 @@ START_TEST(jr_c_d_test)
 
     // Reset carry flag: CPU must NOT jump
     cpu->tstates = 0;
-    cpu->pc.WORD = 0;
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
+    PC(*cpu) = 0;
+    RESET_FLAG(REG_F(*cpu), FLAG_C);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 2);
+    ck_assert(PC(*cpu) == 2);
     ck_assert(cpu->tstates == 7);
 
     // Set carry flag: CPU MUST jump
-    cpu->pc.WORD = 0;
+    PC(*cpu) = 0;
     cpu->tstates = 0;
-    SET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
+    SET_FLAG(REG_F(*cpu), FLAG_C);
     execute_opcode(cpu);
-    ck_assert(cpu->pc.WORD == 7);
+    ck_assert(PC(*cpu) == 7);
     ck_assert(cpu->tstates == 12);
 
     teardown_cpu(cpu);

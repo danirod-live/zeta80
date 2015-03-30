@@ -33,6 +33,9 @@
 /** Reset a given flag (turn the flag to 0). */
 #define RESET_FLAG(f, flag) (f = (f & ~flag))
 
+/** Set a flag if a condition is true. */
+#define SET_IF(f, flag, cond) (f = cond ? (f | flag) : (f & ~flag))
+
 /**
  * CPU flags. These flags are located in F register.
  */
@@ -92,5 +95,54 @@ struct cpu_t
     int tstates;                //< T-State counter
 };
 
+/*
+ * These macros expand to the full path to the field of a given register in
+ * the CPU structure. They are useful defined as macros because they work
+ * exceptionally well with any operator.
+ *
+ * This makes these macros suitable for any kind of operation:
+ * Assignments, such as REG_A(cpu) = 0x55
+ * Comparations, such as REG_BC(cpu) == 0x0000
+ * Pre/post increments or decrements, such as REG_B(cpu)--.
+ * Many other C operations.
+ */
+
+#define REG_A(cpu) ((cpu).main.af.BYTES.H) // Expands to A
+#define REG_F(cpu) ((cpu).main.af.BYTES.L) // Expands to F
+#define REG_B(cpu) ((cpu).main.bc.BYTES.H) // Expands to B
+#define REG_C(cpu) ((cpu).main.bc.BYTES.L) // Expands to C
+#define REG_D(cpu) ((cpu).main.de.BYTES.H) // Expands to D
+#define REG_E(cpu) ((cpu).main.de.BYTES.L) // Expands to E
+#define REG_H(cpu) ((cpu).main.hl.BYTES.H) // Expands to H
+#define REG_L(cpu) ((cpu).main.hl.BYTES.L) // Expands to L
+
+#define REG_AF(cpu) ((cpu).main.af.WORD) // Expands to AF
+#define REG_BC(cpu) ((cpu).main.bc.WORD) // Expands to BC
+#define REG_DE(cpu) ((cpu).main.de.WORD) // Expands to DE
+#define REG_HL(cpu) ((cpu).main.hl.WORD) // Expands to HL
+
+#define ALT_A(cpu) ((cpu).alternate.af.BYTES.H) // Expands to A'
+#define ALT_F(cpu) ((cpu).alternate.af.BYTES.L) // Expands to F'
+#define ALT_B(cpu) ((cpu).alternate.bc.BYTES.H) // Expands to B'
+#define ALT_C(cpu) ((cpu).alternate.bc.BYTES.L) // Expands to C'
+#define ALT_D(cpu) ((cpu).alternate.de.BYTES.H) // Expands to D'
+#define ALT_E(cpu) ((cpu).alternate.de.BYTES.L) // Expands to E'
+#define ALT_H(cpu) ((cpu).alternate.hl.BYTES.H) // Expands to H'
+#define ALT_L(cpu) ((cpu).alternate.hl.BYTES.L) // Expands to L'
+
+#define ALT_AF(cpu) ((cpu).alternate.af.WORD) // Expands to AF'
+#define ALT_BC(cpu) ((cpu).alternate.bc.WORD) // Expands to BC'
+#define ALT_DE(cpu) ((cpu).alternate.de.WORD) // Expands to DE'
+#define ALT_HL(cpu) ((cpu).alternate.hl.WORD) // Expands to HL'
+
+#define PC(cpu) ((cpu).pc.WORD) // Expands to PC
+#define SP(cpu) ((cpu).sp.WORD) // Expands to SP
+#define IX(cpu) ((cpu).ix.WORD) // Expands to IX
+#define IY(cpu) ((cpu).iy.WORD) // Expands to IY
+
+#define IXH(cpu) ((cpu).ix.BYTES.H) // Expands to IXh
+#define IXL(cpu) ((cpu).ix.BYTES.L) // Expands to IHl
+#define IYH(cpu) ((cpu).iy.BYTES.H) // Expands to IYh
+#define IYL(cpu) ((cpu).iy.BYTES.L) // Expands to IYl
 
 #endif

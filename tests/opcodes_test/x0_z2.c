@@ -32,8 +32,8 @@ START_TEST(ld_bci_a_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x02; // LD (BC); A
 
-    cpu->main.bc.WORD = 0x8000;
-    cpu->main.af.BYTES.H = 0x55;
+    REG_BC(*cpu) = 0x8000;
+    REG_A(*cpu) = 0x55;
     execute_opcode(cpu);
     ck_assert(cpu->mem[0x8000] == 0x55);
     ck_assert(cpu->tstates == 7);
@@ -48,8 +48,8 @@ START_TEST(ld_dei_a_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x12; // LD (DE), A
 
-    cpu->main.de.WORD = 0x8000;
-    cpu->main.af.BYTES.H = 0x55;
+    REG_DE(*cpu) = 0x8000;
+    REG_A(*cpu) = 0x55;
     execute_opcode(cpu);
     ck_assert(cpu->mem[0x8000] == 0x55);
     ck_assert(cpu->tstates == 7);
@@ -66,7 +66,7 @@ START_TEST(ld_nni_hl_test)
     cpu->mem[1] = 0x00; // 0x..00
     cpu->mem[2] = 0x80; // 0x80..
 
-    cpu->main.hl.WORD = 0x1234;
+    REG_HL(*cpu) = 0x1234;
     execute_opcode(cpu);
     ck_assert(cpu->mem[0x8000] = 0x34);
     ck_assert(cpu->mem[0x8001] = 0x12);
@@ -84,7 +84,7 @@ START_TEST(ld_nni_a_test)
     cpu->mem[1] = 0x00; // 0x..00
     cpu->mem[2] = 0x80; // 0x80..
 
-    cpu->main.af.BYTES.H = 0x55;
+    REG_A(*cpu) = 0x55;
     execute_opcode(cpu);
     ck_assert(cpu->mem[0x8000] = 0x55);
     ck_assert(cpu->tstates == 13);
@@ -99,10 +99,10 @@ START_TEST(ld_a_bci_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x0A; // LD A, (BC)
 
-    cpu->main.bc.WORD = 0x8000;
+    REG_BC(*cpu) = 0x8000;
     cpu->mem[0x8000] = 0x55;
     execute_opcode(cpu);
-    ck_assert(cpu->main.af.BYTES.H == 0x55);
+    ck_assert(REG_A(*cpu) == 0x55);
     ck_assert(cpu->tstates == 7);
 
     teardown_cpu(cpu);
@@ -115,10 +115,10 @@ START_TEST(ld_a_dei_test)
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x1A; // LD A, (DE)
 
-    cpu->main.de.WORD = 0x8000;
+    REG_DE(*cpu) = 0x8000;
     cpu->mem[0x8000] = 0x55;
     execute_opcode(cpu);
-    ck_assert(cpu->main.af.BYTES.H == 0x55);
+    ck_assert(REG_A(*cpu) == 0x55);
     ck_assert(cpu->tstates == 7);
 
     teardown_cpu(cpu);
@@ -134,7 +134,7 @@ START_TEST(ld_hl_nni_test)
     cpu->mem[0x8000] = 0x34; // 0x..34
     cpu->mem[0x8001] = 0x12; // 0x12..
     execute_opcode(cpu);
-    ck_assert(cpu->main.hl.WORD == 0x1234);
+    ck_assert(REG_HL(*cpu) == 0x1234);
     ck_assert(cpu->tstates == 16);
 
     teardown_cpu(cpu);
@@ -149,7 +149,7 @@ START_TEST(ld_a_nni_test)
 
     cpu->mem[0x8000] = 0x55;
     execute_opcode(cpu);
-    ck_assert(cpu->main.af.BYTES.H == 0x55);
+    ck_assert(REG_A(*cpu) == 0x55);
     ck_assert(cpu->tstates == 13);
 
     teardown_cpu(cpu);

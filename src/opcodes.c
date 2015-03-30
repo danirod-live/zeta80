@@ -36,11 +36,8 @@ nop(struct cpu_t* cpu)
 static void
 ex_af_af(struct cpu_t* cpu)
 {
-    union register_t* af = &cpu->main.af;
-    union register_t* af2 = &cpu->alternate.af;
-    word tmp = af->WORD;
-    af->WORD = af2->WORD;
-    af2->WORD = tmp;
+    word tmp = REG_A(*cpu);
+    REG_A(*cpu) = ALT_A(*cpu);
 
     cpu->tstates += 4;
 }
@@ -48,11 +45,12 @@ ex_af_af(struct cpu_t* cpu)
 static void
 djnz_d(struct cpu_t* cpu)
 {
-    signed char e = (signed char) cpu->mem[cpu->pc.WORD++];
-    if (--cpu->main.bc.BYTES.H == 0) {
+    char e = (char) cpu->mem[PC(*cpu)++];
+
+    if (--REG_B(*cpu) == 0) {
         cpu->tstates += 8;
     } else {
-        cpu->pc.WORD += e;
+        PC(*cpu) += e;
         cpu->tstates = 13;
     }
 }
@@ -60,17 +58,17 @@ djnz_d(struct cpu_t* cpu)
 static void
 jr_d(struct cpu_t* cpu)
 {
-    signed char e = (signed char) cpu->mem[cpu->pc.WORD++];
-    cpu->pc.WORD += e;
+    char e = (char) cpu->mem[PC(*cpu)++];
+    PC(*cpu) += e;
     cpu->tstates = 12;
 }
 
 static void
 jr_nz(struct cpu_t* cpu)
 {
-    signed char e = (signed char) cpu->mem[cpu->pc.WORD++];
-    if ( GET_FLAG(cpu->main.af.BYTES.L, FLAG_Z) == 0) {
-        cpu->pc.WORD += e;
+    char e = (char) cpu->mem[PC(*cpu)++];
+    if (GET_FLAG(REG_F(*cpu), FLAG_Z) == 0) {
+        PC(*cpu) += e;
         cpu->tstates += 12;
     } else {
         cpu->tstates += 7;
@@ -80,8 +78,8 @@ jr_nz(struct cpu_t* cpu)
 static void
 jr_z(struct cpu_t* cpu)
 {
-    signed char e = (signed char) cpu->mem[cpu->pc.WORD++];
-    if ( GET_FLAG(cpu->main.af.BYTES.L, FLAG_Z) != 0) {
+    char e = (char) cpu->mem[PC(*cpu)++];
+    if (GET_FLAG(REG_F(*cpu), FLAG_Z) != 0) {
         cpu->pc.WORD += e;
         cpu->tstates += 12;
     } else {
@@ -92,8 +90,8 @@ jr_z(struct cpu_t* cpu)
 static void
 jr_nc(struct cpu_t* cpu)
 {
-    signed char e = (signed char) cpu->mem[cpu->pc.WORD++];
-    if ( GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) == 0) {
+    char e = (char) cpu->mem[PC(*cpu)++];
+    if (GET_FLAG(REG_F(*cpu), FLAG_C) == 0) {
         cpu->pc.WORD += e;
         cpu->tstates += 12;
     } else {
@@ -104,8 +102,8 @@ jr_nc(struct cpu_t* cpu)
 static void
 jr_c(struct cpu_t* cpu)
 {
-    signed char e = (signed char) cpu->mem[cpu->pc.WORD++];
-    if ( GET_FLAG(cpu->main.af.BYTES.L, FLAG_C) != 0) {
+    char e = (char) cpu->mem[PC(*cpu)++];
+    if(GET_FLAG(REG_F(*cpu), FLAG_C) != 0) {
         cpu->pc.WORD += e;
         cpu->tstates += 12;
     } else {
@@ -116,10 +114,9 @@ jr_c(struct cpu_t* cpu)
 static void
 ld_dd_nn(struct cpu_t* cpu, union register_t* reg)
 {
-    // Read NN from memory. It's a 16 bit value.
-    word nn = (cpu->mem[cpu->pc.WORD]) | (cpu->mem[cpu->pc.WORD+1] << 8);
-    cpu->pc.WORD += 2;
-
+    // Read NN in memory. Remember: Z80 is little endian.
+    word nn = cpu->mem[PC(*cpu)] | (cpu->mem[PC(*cpu) + 1] << 8);
+    PC(*cpu) += 2; // Increment program counter after read.
     reg->WORD = nn;
     cpu->tstates += 10;
 }
@@ -127,24 +124,13 @@ ld_dd_nn(struct cpu_t* cpu, union register_t* reg)
 static void
 add_hl_ss(struct cpu_t* cpu, union register_t* reg)
 {
-    word op1 = cpu->main.hl.WORD, op2 = reg->WORD;
+    word op1 = REG_HL(*cpu), op2 = reg->WORD;
 
-    // Flag N must be reset anyway.
-    RESET_FLAG(cpu->main.af.BYTES.L, FLAG_N);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    SET_IF(REG_F(*cpu), FLAG_H, ((op1 & 0x7FF + op2 & 0x7FF) & 0x800) != 0);
+    SET_IF(REG_F(*cpu), FLAG_C, ((op1 + op2) & 0x10000) != 0);
 
-    // Flag H must be set if carry from bit 11.
-    if ((((op1 & 0x07FF) + (op2 & 0x7FF)) & 0x0800) != 0)
-        SET_FLAG(cpu->main.af.BYTES.L, FLAG_H);
-    else
-        RESET_FLAG(cpu->main.af.BYTES.L, FLAG_H);
-
-    // Flag C must be set if carry from bit 15.
-    if (((op1 + op2) & 0x10000) != 0)
-        SET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
-    else
-        RESET_FLAG(cpu->main.af.BYTES.L, FLAG_C);
-
-    cpu->main.hl.WORD += reg->WORD;
+    REG_HL(*cpu) += reg->WORD;
     cpu->tstates += 11;
 }
 
