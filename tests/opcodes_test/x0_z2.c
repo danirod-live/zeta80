@@ -130,9 +130,11 @@ START_TEST(ld_hl_nni_test)
 {
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x2A; // LD HL, (NN)
-
+    cpu->mem[1] = 0x00; // 0x..00
+    cpu->mem[2] = 0x80; // 0x80..
     cpu->mem[0x8000] = 0x34; // 0x..34
     cpu->mem[0x8001] = 0x12; // 0x12..
+
     execute_opcode(cpu);
     ck_assert(REG_HL(*cpu) == 0x1234);
     ck_assert(cpu->tstates == 16);
@@ -146,8 +148,10 @@ START_TEST(ld_a_nni_test)
 {
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x3A; // LD A, (NN)
-
+    cpu->mem[1] = 0x00; // 0x..00
+    cpu->mem[2] = 0x80; // 0x80..
     cpu->mem[0x8000] = 0x55;
+
     execute_opcode(cpu);
     ck_assert(REG_A(*cpu) == 0x55);
     ck_assert(cpu->tstates == 13);

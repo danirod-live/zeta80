@@ -56,11 +56,13 @@ gensuite_opcodes(void)
     TCase* x0_z0_tcase = gen_x0_z0_tcase();
     TCase* x0_z1_tcase = gen_x0_z1_tcase();
     TCase* x0_z2_tcase = gen_x0_z2_tcase();
+    TCase* x0_z3_tcase = gen_x0_z3_tcase();
 
     Suite* s = suite_create("Opcodes");
     suite_add_tcase(s, extract_opcodes_tcase);
     suite_add_tcase(s, x0_z0_tcase);
     suite_add_tcase(s, x0_z1_tcase);
     suite_add_tcase(s, x0_z2_tcase);
+    suite_add_tcase(s, x0_z3_tcase);
     return s;
 }
