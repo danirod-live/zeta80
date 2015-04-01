@@ -19,6 +19,7 @@
  *   this software without specific prior written permission.
  */
 
+#include <stdio.h>
 #include <opcodes.h>
 #include <cpu.h>
 
@@ -127,11 +128,86 @@ add_hl_ss(struct cpu_t* cpu, union register_t* reg)
     word op1 = REG_HL(*cpu), op2 = reg->WORD;
 
     RESET_FLAG(REG_F(*cpu), FLAG_N);
-    SET_IF(REG_F(*cpu), FLAG_H, ((op1 & 0x7FF + op2 & 0x7FF) & 0x800) != 0);
+    printf("op1=%x, op2=%x", op1, op2);
+    SET_IF(REG_F(*cpu), FLAG_H, ((op1 & 0xFFF + op2 & 0xFFF) & 0x1000) != 0);
     SET_IF(REG_F(*cpu), FLAG_C, ((op1 + op2) & 0x10000) != 0);
 
     REG_HL(*cpu) += reg->WORD;
     cpu->tstates += 11;
+}
+
+// [BC] <- A
+static void
+ld_bci_a(struct cpu_t* cpu)
+{
+    cpu->mem[REG_BC(*cpu)] = REG_A(*cpu);
+    cpu->tstates += 7;
+}
+
+// [DE] <- A
+static void
+ld_dei_a(struct cpu_t* cpu)
+{
+    cpu->mem[REG_DE(*cpu)] = REG_A(*cpu);
+    cpu->tstates += 7;
+}
+
+// [NN] <- A
+static void
+ld_nni_a(struct cpu_t* cpu)
+{
+    word addr = cpu->mem[PC(*cpu)] | (cpu->mem[PC(*cpu) + 1] << 8);
+    PC(*cpu) += 2;
+    cpu->mem[addr] = REG_A(*cpu);
+    cpu->tstates += 13;
+}
+
+// [NN] <- HL: [NN] <- L, [NN+1] <- H
+static void
+ld_nni_hl(struct cpu_t* cpu)
+{
+    word addr = cpu->mem[PC(*cpu)] | (cpu->mem[PC(*cpu) + 1] << 8);
+    PC(*cpu) += 2;
+    cpu->mem[addr] = REG_L(*cpu);
+    cpu->mem[addr + 1] = REG_H(*cpu);
+    cpu->tstates += 16;
+}
+
+// A <- [BC]
+static void
+ld_a_bci(struct cpu_t* cpu)
+{
+    REG_A(*cpu) = cpu->mem[REG_BC(*cpu)];
+    cpu->tstates += 7;
+}
+
+// A <- [DE]
+static void
+ld_a_dei(struct cpu_t* cpu)
+{
+    REG_A(*cpu) = cpu->mem[REG_DE(*cpu)];
+    cpu->tstates += 7;
+}
+
+// A <- [NN]
+static void
+ld_a_nni(struct cpu_t* cpu)
+{
+    word addr = cpu->mem[PC(*cpu)] | (cpu->mem[PC(*cpu)+1] << 8);
+    PC(*cpu) += 2;
+    REG_A(*cpu) = cpu->mem[addr];
+    cpu->tstates += 13;
+}
+
+// HL <- [NN]
+static void
+ld_hl_nni(struct cpu_t* cpu)
+{
+    word addr = cpu->mem[PC(*cpu)] | (cpu->mem[PC(*cpu)+1] << 8);
+    PC(*cpu) += 2;
+    REG_L(*cpu) = cpu->mem[addr];
+    REG_H(*cpu) = cpu->mem[addr + 1];
+    cpu->tstates = 16;
 }
 
 /**
@@ -181,6 +257,22 @@ execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
     {
         if (opstruct->q == 0) ld_dd_nn(cpu, rp[(int) opstruct->p]);
         if (opstruct->q == 1) add_hl_ss(cpu, rp[(int) opstruct->p]);
+    }
+    else if (opstruct->z == 2)
+    {
+        if (opstruct->q == 0) {
+            if (opstruct->p == 0) ld_bci_a(cpu);
+            if (opstruct->p == 1) ld_dei_a(cpu);
+            if (opstruct->p == 2) ld_nni_hl(cpu);
+            if (opstruct->p == 3) ld_nni_a(cpu);
+        }
+        else
+        {
+            if (opstruct->p == 0) ld_a_bci(cpu);
+            if (opstruct->p == 1) ld_a_dei(cpu);
+            if (opstruct->p == 2) ld_hl_nni(cpu);
+            if (opstruct->p == 3) ld_a_nni(cpu);
+        }
     }
 }
 
