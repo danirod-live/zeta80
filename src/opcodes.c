@@ -36,9 +36,9 @@ nop(struct cpu_t* cpu)
 static void
 ex_af_af(struct cpu_t* cpu)
 {
-    word tmp = REG_A(*cpu);
-    REG_A(*cpu) = ALT_A(*cpu);
-
+    word tmp = REG_AF(*cpu);
+    REG_AF(*cpu) = ALT_AF(*cpu);
+    ALT_AF(*cpu) = tmp;
     cpu->tstates += 4;
 }
 
