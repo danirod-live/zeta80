@@ -23,6 +23,22 @@
 #include <opcodes.h>
 #include <cpu.h>
 
+byte* r(struct cpu_t* cpu, unsigned int index)
+{
+    switch (index)
+    {
+        case 0: return &REG_B(*cpu);
+        case 1: return &REG_C(*cpu);
+        case 2: return &REG_D(*cpu);
+        case 3: return &REG_E(*cpu);
+        case 4: return &REG_H(*cpu);
+        case 5: return &REG_L(*cpu);
+        case 6: return &cpu->mem[REG_HL(*cpu)];
+        case 7: return &REG_A(*cpu);
+        default: return NULL;
+    }
+}
+
 /**
  * Executes NOP. This opcode does nothing. It just refreshes memory.
  *
@@ -210,6 +226,36 @@ ld_hl_nni(struct cpu_t* cpu)
     cpu->tstates = 16;
 }
 
+static void
+inc_r16(struct cpu_t* cpu, union register_t* reg)
+{
+    reg->WORD++;
+    cpu->tstates += 6;
+}
+
+static void
+dec_r16(struct cpu_t* cpu, union register_t* reg)
+{
+    reg->WORD--;
+    cpu->tstates += 6;
+}
+
+static void
+inc_r8(struct cpu_t* cpu, int index)
+{
+    byte* val = r(cpu, index);
+    (*val)++;
+    cpu->tstates += 4;
+}
+
+static void
+dec_r8(struct cpu_t* cpu, int index)
+{
+    byte* val = r(cpu, index);
+    (*val)--;
+    cpu->tstates += 4;
+}
+
 /**
  * Extrae los trozos de un opcode a partir del opcode tal cual que se
  * haya sacado de memoria. Aplica una serie de máscaras de bit para sacar
@@ -273,6 +319,22 @@ execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
             if (opstruct->p == 2) ld_hl_nni(cpu);
             if (opstruct->p == 3) ld_a_nni(cpu);
         }
+    }
+    else if (opstruct->z == 3)
+    {
+        if (opstruct->q == 0) {
+            inc_r16(cpu, rp[opstruct->p]);
+        } else {
+            dec_r16(cpu, rp[opstruct->p]);
+        }
+    }
+    else if (opstruct->z == 4)
+    {
+        inc_r8(cpu, opstruct->p);
+    }
+    else if (opstruct->z == 5)
+    {
+        dec_r8(cpu, opstruct->p);
     }
 }
 
