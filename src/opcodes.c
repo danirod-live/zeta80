@@ -144,9 +144,8 @@ add_hl_ss(struct cpu_t* cpu, union register_t* reg)
     word op1 = REG_HL(*cpu), op2 = reg->WORD;
 
     RESET_FLAG(REG_F(*cpu), FLAG_N);
-    printf("op1=%x, op2=%x", op1, op2);
-    SET_IF(REG_F(*cpu), FLAG_H, ((op1 & 0xFFF + op2 & 0xFFF) & 0x1000) != 0);
-    SET_IF(REG_F(*cpu), FLAG_C, ((op1 + op2) & 0x10000) != 0);
+    SET_IF(REG_F(*cpu), FLAG_H, ((op1 & 0xFFF) + (op2 & 0xFFF)) & 0x1000);
+    SET_IF(REG_F(*cpu), FLAG_C, (op1 + op2) & 0x10000);
 
     REG_HL(*cpu) += reg->WORD;
     cpu->tstates += 11;
