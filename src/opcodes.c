@@ -329,11 +329,11 @@ execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
     }
     else if (opstruct->z == 4)
     {
-        inc_r8(cpu, opstruct->p);
+        inc_r8(cpu, opstruct->y);
     }
     else if (opstruct->z == 5)
     {
-        dec_r8(cpu, opstruct->p);
+        dec_r8(cpu, opstruct->y);
     }
 }
 
