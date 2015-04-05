@@ -58,6 +58,7 @@ gensuite_opcodes(void)
     TCase* x0_z2_tcase = gen_x0_z2_tcase();
     TCase* x0_z3_tcase = gen_x0_z3_tcase();
     TCase* x0_z4_tcase = gen_x0_z4_tcase();
+    TCase* x0_z6_tcase = gen_x0_z6_tcase();
 
     Suite* s = suite_create("Opcodes");
     suite_add_tcase(s, extract_opcodes_tcase);
@@ -66,5 +67,6 @@ gensuite_opcodes(void)
     suite_add_tcase(s, x0_z2_tcase);
     suite_add_tcase(s, x0_z3_tcase);
     suite_add_tcase(s, x0_z4_tcase);
+    suite_add_tcase(s, x0_z6_tcase);
     return s;
 }
