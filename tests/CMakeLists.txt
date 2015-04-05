@@ -47,6 +47,7 @@ set(ZETA80_TEST_SRC
     opcodes_test/x0_z3.c
     opcodes_test/x0_z4.c
     opcodes_test/x0_z6.c
+    opcodes_test/x0_z7.c
     )
 
 set(ZETA80_TEST_INCLUDE
