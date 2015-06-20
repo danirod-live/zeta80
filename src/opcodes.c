@@ -243,7 +243,16 @@ static void
 inc_r8(struct cpu_t* cpu, int index)
 {
     byte* val = r(cpu, index);
+
+    SET_IF(REG_F(*cpu), FLAG_H, (*val & 0xF) == 0xF);
+    SET_IF(REG_F(*cpu), FLAG_P, (*val == 0x7F));
+
     (*val)++;
+
+    SET_IF(REG_F(*cpu), FLAG_S, (*val & 0x80) != 0);
+    SET_IF(REG_F(*cpu), FLAG_Z, *val == 0);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+
     cpu->tstates += 4;
 }
 
@@ -252,6 +261,96 @@ dec_r8(struct cpu_t* cpu, int index)
 {
     byte* val = r(cpu, index);
     (*val)--;
+    cpu->tstates += 4;
+}
+
+static void
+ld_r_n(struct cpu_t* cpu, int index)
+{
+    byte n = cpu->mem[PC(*cpu)++];
+    byte* pos = r(cpu, index);
+    *pos = n;
+    cpu->tstates += 7;
+}
+
+static void
+rlca(struct cpu_t* cpu)
+{
+    byte bit7 = (REG_A(*cpu) & 0x80) >> 7;
+    REG_A(*cpu) <<= 1;
+    REG_A(*cpu) &= 0xFE;
+    REG_A(*cpu) |= bit7;
+    SET_IF(REG_F(*cpu), FLAG_C, (bit7 != 0));
+    RESET_FLAG(REG_F(*cpu), FLAG_H);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    cpu->tstates += 4;
+}
+
+static void
+rrca(struct cpu_t* cpu)
+{
+    byte bit0 = REG_A(*cpu) & 1;
+    REG_A(*cpu) >>= 1;
+    REG_A(*cpu) &= 0x7F;
+    REG_A(*cpu) |= (bit0 ? 0x80 : 0x00);
+    SET_IF(REG_F(*cpu), FLAG_C, (bit0 != 0));
+    RESET_FLAG(REG_F(*cpu), FLAG_H);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    cpu->tstates += 4;
+}
+
+static void
+rla(struct cpu_t* cpu)
+{
+    byte bit7 = (REG_A(*cpu) & 0x80) >> 7;
+    byte cf = GET_FLAG(REG_F(*cpu), FLAG_C) ? 1 : 0;
+    REG_A(*cpu) <<= 1;
+    REG_A(*cpu) &= 0xFE;
+    REG_A(*cpu) |= cf;
+    SET_IF(REG_F(*cpu), FLAG_C, (bit7 != 0));
+    RESET_FLAG(REG_F(*cpu), FLAG_H);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    cpu->tstates += 4;
+}
+
+static void
+rra(struct cpu_t* cpu)
+{
+    byte bit0 = REG_A(*cpu) & 1;
+    byte cf = GET_FLAG(REG_F(*cpu), FLAG_C) ? 1 : 0;
+    REG_A(*cpu) >>= 1;
+    REG_A(*cpu) &= 0x7F;
+    REG_A(*cpu) |= (cf << 7);
+    SET_IF(REG_F(*cpu), FLAG_C, bit0 != 0);
+    RESET_FLAG(REG_F(*cpu), FLAG_H);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    cpu->tstates += 4;
+}
+
+static void
+cpl(struct cpu_t* cpu)
+{
+    REG_A(*cpu) = ~REG_A(*cpu);
+    SET_FLAG(REG_F(*cpu), FLAG_H);
+    SET_FLAG(REG_F(*cpu), FLAG_N);
+    cpu->tstates += 4;
+}
+
+static void
+scf(struct cpu_t* cpu)
+{
+    SET_FLAG(REG_F(*cpu), FLAG_C);
+    RESET_FLAG(REG_F(*cpu), FLAG_H);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    cpu->tstates += 4;
+}
+
+static void
+ccf(struct cpu_t* cpu)
+{
+    SET_IF(REG_F(*cpu), FLAG_H, GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
+    SET_IF(REG_F(*cpu), FLAG_C, GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
     cpu->tstates += 4;
 }
 
@@ -334,6 +433,20 @@ execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
     else if (opstruct->z == 5)
     {
         dec_r8(cpu, opstruct->y);
+    }
+    else if (opstruct->z == 6)
+    {
+        ld_r_n(cpu, opstruct->y);
+    }
+    else
+    {
+        if (opstruct->y == 0) rlca(cpu);
+        if (opstruct->y == 1) rrca(cpu);
+        if (opstruct->y == 2) rla(cpu);
+        if (opstruct->y == 3) rra(cpu);
+        if (opstruct->y == 5) cpl(cpu);
+        if (opstruct->y == 6) scf(cpu);
+        if (opstruct->y == 7) ccf(cpu);
     }
 }
 

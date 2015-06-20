@@ -59,9 +59,9 @@ START_TEST(rrca_test)
 {
     struct cpu_t* cpu = setup_cpu();
     cpu->mem[0] = 0x0f;
-    REG_A(*cpu) = 0x76;
+    REG_A(*cpu) = 0x66;
     execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0x98);
+    ck_assert(REG_A(*cpu) == 0xCC);
     ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
     ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
     ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
@@ -129,7 +129,7 @@ START_TEST(ccf_set_test)
     RESET_FLAG(REG_F(*cpu), FLAG_C);
     execute_opcode(cpu);
     ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) != 0);
+    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
     ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
     teardown_cpu(cpu);
 }
