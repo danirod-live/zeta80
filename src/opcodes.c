@@ -359,7 +359,7 @@ static void ld_ry_rz(struct cpu_t* cpu, int y, int z) {
     byte* regZ = r(cpu, z);
     byte* regY = r(cpu, y);
     *regY = *regZ;
-    if (y == 6 || z == 6) {
+    if (y == 6 || z == 6) {
         cpu->tstates += 7;
     } else {
         cpu->tstates += 4;
@@ -510,7 +510,7 @@ execute_table1(struct cpu_t* cpu, struct opcode_t* opstruct)
     if (opstruct->y == 6 && opstruct->z == 6) {
         // HALT:
     } else {
-        ld_rx_ry(cpu, opstruct->y, opstruct->z);
+        ld_ry_rz(cpu, opstruct->y, opstruct->z);
     }
 }
 
