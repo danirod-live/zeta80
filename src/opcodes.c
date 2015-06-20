@@ -354,6 +354,18 @@ ccf(struct cpu_t* cpu)
     cpu->tstates += 4;
 }
 
+// x = 1, y != 6 && z != 6 -> LD r[y], r[z]
+static void ld_ry_rz(struct cpu_t* cpu, int y, int z) {
+    byte* regZ = r(cpu, z);
+    byte* regY = r(cpu, y);
+    *regY = *regZ;
+    if (y == 6 || z == 6) {
+        cpu->tstates += 7;
+    } else {
+        cpu->tstates += 4;
+    }
+}
+
 /**
  * Extrae los trozos de un opcode a partir del opcode tal cual que se
  * haya sacado de memoria. Aplica una serie de máscaras de bit para sacar
@@ -451,13 +463,71 @@ execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
 }
 
 static void
+add_a(struct cpu_t* cpu, int z) {
+    byte* zz = r(cpu, z);
+    REG_A(*cpu) += *zz;
+    cpu->tstates += 7;
+    SET_IF(REG_F(*cpu), FLAG_S, (REG_A(*cpu) & 0x80) != 0);
+    SET_IF(REG_F(*cpu), FLAG_Z, REG_A(*cpu) == 0);
+    // TODO: FLAG_H
+    // TODO: FLAG_P
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    // TODO: FLAG_C
+}
+
+static void
+adc_a(struct cpu_t* cpu, int z) {
+    byte* zz = r(cpu, z);
+    REG_A(*cpu) += *zz;
+    if (GET_FLAG(REG_F(*cpu), FLAG_C) != 0) {
+        REG_A(*cpu)++;
+    }
+    cpu->tstates += 7;
+    SET_IF(REG_F(*cpu), FLAG_S, (REG_A(*cpu) & 0x80) != 0);
+    SET_IF(REG_F(*cpu), FLAG_Z, REG_A(*cpu) == 0);
+    // TODO: FLAG_H
+    // TODO: FLAG_P
+    RESET_FLAG(REG_F(*cpu), FLAG_N);
+    // TODO: FLAG_C
+}
+
+static void
+sub_a(struct cpu_t* cpu, int z) {
+    byte* zz = r(cpu, z);
+    REG_A(*cpu) -= *zz;
+    cpu->tstates += 7;
+    SET_IF(REG_F(*cpu), FLAG_S, (REG_A(*cpu) & 0x80) != 0);
+    SET_IF(REG_F(*cpu), FLAG_Z, REG_A(*cpu) == 0);
+    // TODO: FLAG_H
+    // TODO: FLAG_P
+    SET_FLAG(REG_F(*cpu), FLAG_N);
+    // TODO: FLAG_C
+}
+
+static void
 execute_table1(struct cpu_t* cpu, struct opcode_t* opstruct)
 {
+    if (opstruct->y == 6 && opstruct->z == 6) {
+        // HALT:
+    } else {
+        ld_rx_ry(cpu, opstruct->y, opstruct->z);
+    }
 }
 
 static void
 execute_table2(struct cpu_t* cpu, struct opcode_t* opstruct)
 {
+    switch (opstruct->y) {
+        case 0:
+            add_a(cpu, opstruct->z);
+            break;
+        case 1:
+            adc_a(cpu, opstruct->z);
+            break;
+        case 2:
+            sub_a(cpu, opstruct->z);
+            break;
+    }
 }
 
 static void
