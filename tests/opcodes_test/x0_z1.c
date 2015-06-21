@@ -26,288 +26,332 @@
 
 #include "../opcodes_test.h" // Testcase definitions.
 
-/* Testcase for LD BC, NN instruction. */
-START_TEST(ld_bc_nn_test)
+START_TEST(test_LC_BC_NN)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x01; // LD BC
-    cpu->mem[1] = 0x34; // 0x..34
-    cpu->mem[2] = 0x12; // 0x12..
-
-    execute_opcode(cpu);
-    ck_assert(REG_BC(*cpu) == 0x1234);
-    ck_assert(cpu->tstates == 10);
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x01;
+    cpu.mem[1] = 0x34;
+    cpu.mem[2] = 0x12;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1234, REG_BC(cpu));
+    ck_assert_uint_eq(10, cpu.tstates);
 }
 END_TEST
 
-/* Testcase for LD DE, NN instruction. */
-START_TEST(ld_de_nn_test)
+START_TEST(test_LD_DE_NN)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x11; // LD DE
-    cpu->mem[1] = 0x34; // 0x..34
-    cpu->mem[2] = 0x12; // 0x12..
-
-    execute_opcode(cpu);
-    ck_assert(REG_DE(*cpu) == 0x1234);
-    ck_assert(cpu->tstates == 10);
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x11;
+    cpu.mem[1] = 0x34;
+    cpu.mem[2] = 0x12;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1234, REG_DE(cpu));
+    ck_assert_uint_eq(10, cpu.tstates);
 }
 END_TEST
 
-/* Testcase for LD HL, NN instruction. */
-START_TEST(ld_hl_nn_test)
+START_TEST(test_LD_HL_NN)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x21; // LD HL
-    cpu->mem[1] = 0x34; // 0x..34
-    cpu->mem[2] = 0x12; // 0x12..
-
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1234);
-    ck_assert(cpu->tstates == 10);
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x21;
+    cpu.mem[1] = 0x34;
+    cpu.mem[2] = 0x12;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1234, REG_HL(cpu));
+    ck_assert_uint_eq(10, cpu.tstates);
 }
 END_TEST
 
-/* Testcase for LD SP, NN instruction. */
-START_TEST(ld_sp_nn_test)
+START_TEST(test_LD_SP_NN)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x31; // LD SP
-    cpu->mem[1] = 0x34; // 0x..34
-    cpu->mem[2] = 0x12; // 0x12..
-
-    execute_opcode(cpu);
-    ck_assert(SP(*cpu) == 0x1234);
-    ck_assert(cpu->tstates == 10);
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x31;
+    cpu.mem[1] = 0x34;
+    cpu.mem[2] = 0x12;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1234, SP(cpu));
+    ck_assert_uint_eq(10, cpu.tstates);
 }
 END_TEST
 
-/* Testcase for ADD HL, BC instruction. */
-START_TEST(add_hl_bc_test)
+START_TEST(test_ADD_HL_BC)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x09; // ADD HL, BC
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x4242;
-    REG_BC(*cpu) = 0x1111;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x5353);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x0800;
-    REG_BC(*cpu) = 0x0800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8000;
-    REG_BC(*cpu) = 0x8000;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x0000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8800;
-    REG_BC(*cpu) = 0x8800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x09; // ADD HL, BC
+    REG_HL(cpu) = 0x4242;
+    REG_BC(cpu) = 0x1111;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x5353, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
 }
 END_TEST
 
-/* Testcase for ADD HL, DE instruction. */
-START_TEST(add_hl_de_test)
+START_TEST(test_ADD_HL_BC_hf)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x19; // ADD HL, DE
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x4242;
-    REG_DE(*cpu) = 0x1111;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x5353);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x0800;
-    REG_DE(*cpu) = 0x0800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8000;
-    REG_DE(*cpu) = 0x8000;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x0000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8800;
-    REG_DE(*cpu) = 0x8800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x09; // ADD HL, BC
+    REG_HL(cpu) = 0x0800;
+    REG_BC(cpu) = 0x0800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
 }
 END_TEST
 
-/* Testcase for ADD HL, HL instruction. */
-START_TEST(add_hl_hl_test)
+START_TEST(test_ADD_HL_BC_cf)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x29; // ADD HL, HL
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x4242;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x8484);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x0800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8000;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x0000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x09; // ADD HL, BC
+    REG_HL(cpu) = 0x8000;
+    REG_BC(cpu) = 0x8000;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x0000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
 }
 END_TEST
 
-/* Testcase for ADD HL, SP instruction. */
-START_TEST(add_hl_sp_test)
+START_TEST(test_ADD_HL_BC_hcf)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x39; // ADD HL, SP
+    cpu.mem[0] = 0x09; // ADD HL, BC
+    REG_HL(cpu) = 0x8800;
+    REG_BC(cpu) = 0x8800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
 
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x4242;
-    SP(*cpu) = 0x1111;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x5353);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
+START_TEST(test_ADD_HL_DE)
+{
+    cpu.mem[0] = 0x19; // ADD HL, DE
+    REG_HL(cpu) = 0x4242;
+    REG_DE(cpu) = 0x1111;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x5353, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
 
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x0800;
-    SP(*cpu) = 0x0800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
+START_TEST(test_ADD_HL_DE_hf)
+{
+    cpu.mem[0] = 0x19; // ADD HL, DE
+    REG_HL(cpu) = 0x0800;
+    REG_DE(cpu) = 0x0800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
 
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8000;
-    SP(*cpu) = 0x8000;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x0000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
+START_TEST(test_ADD_HL_DE_cf)
+{
+    cpu.mem[0] = 0x19; // ADD HL, DE
+    REG_HL(cpu) = 0x8000;
+    REG_DE(cpu) = 0x8000;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x0000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
 
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    REG_HL(*cpu) = 0x8800;
-    SP(*cpu) = 0x8800;
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1000);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 1);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    ck_assert(cpu->tstates == 11);
+START_TEST(test_ADD_HL_DE_hcf)
+{
+    cpu.mem[0] = 0x19; // ADD HL, DE
+    REG_HL(cpu) = 0x8800;
+    REG_DE(cpu) = 0x8800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
 
-    teardown_cpu(cpu);
+START_TEST(test_ADD_HL_HL)
+{
+    cpu.mem[0] = 0x29; // ADD HL, HL
+    REG_HL(cpu) = 0x4242;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x8484, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
+
+START_TEST(test_ADD_HL_HL_hf)
+{
+    cpu.mem[0] = 0x29; // ADD HL, HL
+    REG_HL(cpu) = 0x0800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
+
+START_TEST(test_ADD_HL_HL_cf)
+{
+    cpu.mem[0] = 0x29; // ADD HL, HL
+    REG_HL(cpu) = 0x8000;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x0000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
+
+START_TEST(test_ADD_HL_HL_hcf)
+{
+    cpu.mem[0] = 0x29; // ADD HL, HL
+    REG_HL(cpu) = 0x8800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
+
+START_TEST(test_ADD_HL_SP)
+{
+    cpu.mem[0] = 0x39; // ADD HL, SP
+    REG_HL(cpu) = 0x4242;
+    SP(cpu) = 0x1111;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x5353, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
+
+START_TEST(test_ADD_HL_SP_hf)
+{
+    cpu.mem[0] = 0x39; // ADD HL, SP
+    REG_HL(cpu) = 0x0800;
+    SP(cpu) = 0x0800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
+
+START_TEST(test_ADD_HL_SP_cf)
+{
+    cpu.mem[0] = 0x39; // ADD HL, SP
+    REG_HL(cpu) = 0x8000;
+    SP(cpu) = 0x8000;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x0000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
+}
+END_TEST
+
+START_TEST(test_ADD_HL_SP_hcf)
+{
+    cpu.mem[0] = 0x39; // ADD HL, SP
+    REG_HL(cpu) = 0x8800;
+    SP(cpu) = 0x8800;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1000, REG_HL(cpu));
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_C), 0);
+    ck_assert_uint_ne(FLAG_GET(cpu, FLAG_H), 0);
+    ck_assert_uint_eq(FLAG_GET(cpu, FLAG_N), 0);
+    ck_assert_uint_eq(11, cpu.tstates);
 }
 END_TEST
 
 TCase* gen_x0_z1_tcase(void)
 {
-    TCase* test = tcase_create("x=0 z=1 table");
-    tcase_add_test(test, ld_bc_nn_test);
-    tcase_add_test(test, ld_de_nn_test);
-    tcase_add_test(test, ld_hl_nn_test);
-    tcase_add_test(test, ld_sp_nn_test);
-    tcase_add_test(test, add_hl_bc_test);
-    tcase_add_test(test, add_hl_de_test);
-    tcase_add_test(test, add_hl_hl_test);
-    tcase_add_test(test, add_hl_sp_test);
+    TCase* test = tcase_create("x=0, z=1");
+    tcase_add_test(test, test_LC_BC_NN);
+    tcase_add_test(test, test_LD_DE_NN);
+    tcase_add_test(test, test_LD_HL_NN);
+    tcase_add_test(test, test_LD_SP_NN);
+    tcase_add_test(test, test_ADD_HL_BC);
+    tcase_add_test(test, test_ADD_HL_BC_hf);
+    tcase_add_test(test, test_ADD_HL_BC_cf);
+    tcase_add_test(test, test_ADD_HL_BC_hcf);
+    tcase_add_test(test, test_ADD_HL_DE);
+    tcase_add_test(test, test_ADD_HL_DE_hf);
+    tcase_add_test(test, test_ADD_HL_DE_cf);
+    tcase_add_test(test, test_ADD_HL_DE_hcf);
+    tcase_add_test(test, test_ADD_HL_HL);
+    tcase_add_test(test, test_ADD_HL_HL_hf);
+    tcase_add_test(test, test_ADD_HL_HL_cf);
+    tcase_add_test(test, test_ADD_HL_HL_hcf);
+    tcase_add_test(test, test_ADD_HL_SP);
+    tcase_add_test(test, test_ADD_HL_SP_hf);
+    tcase_add_test(test, test_ADD_HL_SP_cf);
+    tcase_add_test(test, test_ADD_HL_SP_hcf);
     return test;
 }

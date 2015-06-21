@@ -24,17 +24,25 @@
 
 #include "types.h"
 
-/** Check whether a flag is set or reset. */
+/** Check whether a flag is set or reset. Deprecated. */
 #define GET_FLAG(f, flag) ((f & flag) != 0)
 
-/** Set a given flag (turn the flag to 1). */
+/** Set a given flag (turn the flag to 1). Deprecated. */
 #define SET_FLAG(f, flag) (f = (f | flag))
 
-/** Reset a given flag (turn the flag to 0). */
+/** Reset a given flag (turn the flag to 0). Deprecated. */
 #define RESET_FLAG(f, flag) (f = (f & ~flag))
 
 /** Set a flag if a condition is true. */
 #define SET_IF(f, flag, cond) (f = cond ? (f | flag) : (f & ~flag))
+
+/** Convenience flag handlers: they work with CPU instead of register. */
+#define FLAG_SET(cpu, flag) ((cpu).main.af.BYTES.L |= flag)
+#define FLAG_RST(cpu, flag) ((cpu).main.af.BYTES.L &= ~(flag))
+#define FLAG_GET(cpu, flag) (((cpu).main.af.BYTES.L & flag) != 0)
+#define FLAG_SIF(cpu, flag, cond) ((cpu).main.af.BYTES.L = cond ? \
+            (cpu).main.af.BYTES.L | flag : \
+            (cpu).main.af.BYTES.L & ~(flag))
 
 /**
  * CPU flags. These flags are located in F register.

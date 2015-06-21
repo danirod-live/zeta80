@@ -26,150 +26,127 @@
 
 #include "../opcodes_test.h" // Testcase definitions.
 
-/* Test for LD (BC), A instruction. */
-START_TEST(ld_bci_a_test)
+START_TEST(test_LD_iBC_A)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x02; // LD (BC); A
-
-    REG_BC(*cpu) = 0x8000;
-    REG_A(*cpu) = 0x55;
-    execute_opcode(cpu);
-    ck_assert(cpu->mem[0x8000] == 0x55);
-    ck_assert(cpu->tstates == 7);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x02; // LD (BC), A
+    REG_BC(cpu) = 0x8000;
+    REG_A(cpu) = 0x55;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x55, cpu.mem[0x8000]);
+    ck_assert_uint_eq(7, cpu.tstates);
 }
 END_TEST
 
-/* Test for LD (DE), A instruction. */
-START_TEST(ld_dei_a_test)
+START_TEST(test_LD_iDE_A)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x12; // LD (DE), A
-
-    REG_DE(*cpu) = 0x8000;
-    REG_A(*cpu) = 0x55;
-    execute_opcode(cpu);
-    ck_assert(cpu->mem[0x8000] == 0x55);
-    ck_assert(cpu->tstates == 7);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x12; // LD (DE), A
+    REG_DE(cpu) = 0x8000;
+    REG_A(cpu) = 0x55;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x55, cpu.mem[0x8000]);
+    ck_assert_uint_eq(7, cpu.tstates);
 }
 END_TEST
 
-/* Test for LD (NN), HL instruction. */
-START_TEST(ld_nni_hl_test)
+START_TEST(test_LD_iNN_HL)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x22; // LD (NN), HL
-    cpu->mem[1] = 0x00; // 0x..00
-    cpu->mem[2] = 0x80; // 0x80..
-
-    REG_HL(*cpu) = 0x1234;
-    execute_opcode(cpu);
-    ck_assert(cpu->mem[0x8000] = 0x34);
-    ck_assert(cpu->mem[0x8001] = 0x12);
-    ck_assert(cpu->tstates == 16);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x22; // LD (NN), HL
+    cpu.mem[1] = 0x00;
+    cpu.mem[2] = 0x80;
+    REG_HL(cpu) = 0x1234;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x34, cpu.mem[0x8000]);
+    ck_assert_uint_eq(0x12, cpu.mem[0x8001]);
+    ck_assert_uint_eq(16, cpu.tstates);
 }
 END_TEST
 
-/* Test for LD (NN), A instruction. */
-START_TEST(ld_nni_a_test)
+START_TEST(test_LD_iNN_A)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x32; // LD (NN), A
-    cpu->mem[1] = 0x00; // 0x..00
-    cpu->mem[2] = 0x80; // 0x80..
-
-    REG_A(*cpu) = 0x55;
-    execute_opcode(cpu);
-    ck_assert(cpu->mem[0x8000] = 0x55);
-    ck_assert(cpu->tstates == 13);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x32;
+    cpu.mem[1] = 0x00;
+    cpu.mem[2] = 0x80;
+    REG_A(cpu) = 0x55;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x55, cpu.mem[0x8000]);
+    ck_assert_uint_eq(13, cpu.tstates);
 }
 END_TEST
 
-/* Test for LD A, (BC) instruction. */
-START_TEST(ld_a_bci_test)
+START_TEST(test_LD_A_iBC)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x0A; // LD A, (BC)
-
-    REG_BC(*cpu) = 0x8000;
-    cpu->mem[0x8000] = 0x55;
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0x55);
-    ck_assert(cpu->tstates == 7);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x0A; // LD A, (BC)
+    cpu.mem[0x8000] = 0x55;
+    REG_BC(cpu) = 0x8000;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x55, REG_A(cpu));
+    ck_assert_uint_eq(7, cpu.tstates);
 }
 END_TEST
 
-/* Test for LD A, (DE) instruction. */
-START_TEST(ld_a_dei_test)
+START_TEST(test_LD_A_iDE)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x1A; // LD A, (DE)
-
-    REG_DE(*cpu) = 0x8000;
-    cpu->mem[0x8000] = 0x55;
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0x55);
-    ck_assert(cpu->tstates == 7);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x1A; // LD A, (DE)
+    cpu.mem[0x8000] = 0x55;
+    REG_DE(cpu) = 0x8000;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x55, REG_A(cpu));
+    ck_assert_uint_eq(7, cpu.tstates);
 }
 END_TEST
 
 /* Test for LD HL, (NN) instruction. */
-START_TEST(ld_hl_nni_test)
+START_TEST(test_LD_HL_iNN)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x2A; // LD HL, (NN)
-    cpu->mem[1] = 0x00; // 0x..00
-    cpu->mem[2] = 0x80; // 0x80..
-    cpu->mem[0x8000] = 0x34; // 0x..34
-    cpu->mem[0x8001] = 0x12; // 0x12..
-
-    execute_opcode(cpu);
-    ck_assert(REG_HL(*cpu) == 0x1234);
-    ck_assert(cpu->tstates == 16);
-
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x2A; // LD HL, (NN)
+    cpu.mem[1] = 0x00;
+    cpu.mem[2] = 0x80;
+    cpu.mem[0x8000] = 0x34;
+    cpu.mem[0x8001] = 0x12;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x1234, REG_HL(cpu));
+    ck_assert_uint_eq(16, cpu.tstates);
 }
 END_TEST
 
-/* Test for LD A, (NN) instruction. */
-START_TEST(ld_a_nni_test)
+START_TEST(test_LD_A_iNN)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x3A; // LD A, (NN)
-    cpu->mem[1] = 0x00; // 0x..00
-    cpu->mem[2] = 0x80; // 0x80..
-    cpu->mem[0x8000] = 0x55;
+    cpu.mem[0] = 0x3A;
+    cpu.mem[1] = 0x00;
+    cpu.mem[2] = 0x80;
+    cpu.mem[0x8000] = 0x55;
 
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0x55);
-    ck_assert(cpu->tstates == 13);
-
-    teardown_cpu(cpu);
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x55, REG_A(cpu));
+    ck_assert_uint_eq(13, cpu.tstates);
 }
 END_TEST
 
 TCase* gen_x0_z2_tcase(void)
 {
-    TCase* test = tcase_create("x=0 z=2 table");
-    tcase_add_test(test, ld_bci_a_test);
-    tcase_add_test(test, ld_dei_a_test);
-    tcase_add_test(test, ld_a_bci_test);
-    tcase_add_test(test, ld_a_dei_test);
-    tcase_add_test(test, ld_nni_hl_test);
-    tcase_add_test(test, ld_nni_a_test);
-    tcase_add_test(test, ld_hl_nni_test);
-    tcase_add_test(test, ld_a_nni_test);
+    TCase* test = tcase_create("x=0, z=2");
+    tcase_add_test(test, test_LD_iBC_A);
+    tcase_add_test(test, test_LD_iDE_A);
+    tcase_add_test(test, test_LD_A_iBC);
+    tcase_add_test(test, test_LD_A_iDE);
+    tcase_add_test(test, test_LD_iNN_HL);
+    tcase_add_test(test, test_LD_iNN_A);
+    tcase_add_test(test, test_LD_HL_iNN);
+    tcase_add_test(test, test_LD_A_iNN);
     return test;
 }

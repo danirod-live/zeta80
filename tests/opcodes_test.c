@@ -28,22 +28,19 @@
 
 #include "opcodes_test.h"
 
-struct cpu_t*
+void
 setup_cpu(void)
 {
-    struct cpu_t* cpu = (struct cpu_t*) malloc(sizeof(struct cpu_t));
-
     // See section 2.4 from The Undocumented Z80 Documented.
-    memset(cpu, 0xFF, sizeof(struct cpu_t));
-    PC(*cpu) = 0;
-    cpu->tstates = 0;
-    return cpu;
+    memset(&cpu, 0xFF, sizeof(struct cpu_t));
+    PC(cpu) = 0;
+    cpu.tstates = 0;
 }
 
 void
-teardown_cpu(struct cpu_t* cpu)
+teardown_cpu(void)
 {
-    free(cpu);
+    // No actually teardown.
 }
 
 /**
@@ -52,23 +49,15 @@ teardown_cpu(struct cpu_t* cpu)
 Suite*
 gensuite_opcodes(void)
 {
-    TCase* extract_opcodes_tcase = gen_extract_opcode_tcase();
-    TCase* x0_z0_tcase = gen_x0_z0_tcase();
-    TCase* x0_z1_tcase = gen_x0_z1_tcase();
-    TCase* x0_z2_tcase = gen_x0_z2_tcase();
-    TCase* x0_z3_tcase = gen_x0_z3_tcase();
-    TCase* x0_z4_tcase = gen_x0_z4_tcase();
-    TCase* x0_z6_tcase = gen_x0_z6_tcase();
-    TCase* x0_z7_tcase = gen_x0_z7_tcase();
-
     Suite* s = suite_create("Opcodes");
-    suite_add_tcase(s, extract_opcodes_tcase);
-    suite_add_tcase(s, x0_z0_tcase);
-    suite_add_tcase(s, x0_z1_tcase);
-    suite_add_tcase(s, x0_z2_tcase);
-    suite_add_tcase(s, x0_z3_tcase);
-    suite_add_tcase(s, x0_z4_tcase);
-    suite_add_tcase(s, x0_z6_tcase);
-    suite_add_tcase(s, x0_z7_tcase);
+    suite_add_tcase(s, gen_extract_opcode_tcase());
+    suite_add_tcase(s, gen_x0_z0_tcase());
+    suite_add_tcase(s, gen_x0_z1_tcase());
+    suite_add_tcase(s, gen_x0_z2_tcase());
+    suite_add_tcase(s, gen_x0_z3_tcase());
+    suite_add_tcase(s, gen_x0_z4_tcase());
+    suite_add_tcase(s, gen_x0_z5_tcase());
+    suite_add_tcase(s, gen_x0_z6_tcase());
+    suite_add_tcase(s, gen_x0_z7_tcase());
     return s;
 }

@@ -26,125 +26,131 @@
 
 #include "../opcodes_test.h" // Testcase definitions.
 
-START_TEST(rlca_test)
+START_TEST(test_RLCA)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x07;
-    REG_A(*cpu) = 0x88;
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0x11);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    teardown_cpu(cpu);
+    // Example from Z80 Manual: 1000 1000 -> 0001 0001 (CF = 1)
+    cpu.mem[0] = 0x07;
+    REG_A(cpu) = 0x88;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x11, REG_A(cpu));
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_C));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-START_TEST(rla_test)
+START_TEST(test_RLA)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x17;
-    REG_A(*cpu) = 0x76;
-    SET_FLAG(REG_F(*cpu), FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0xED);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    teardown_cpu(cpu);
+    // Example from Z80 Manual: 0111 0110 (CF = 1) -> 1110 1101 (CF = 0)
+    cpu.mem[0] = 0x17;
+    REG_A(cpu) = 0x76;
+    FLAG_SET(cpu, FLAG_C);
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0xED, REG_A(cpu));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_C));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-START_TEST(rrca_test)
+START_TEST(test_RRCA)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x0f;
-    REG_A(*cpu) = 0x66;
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0xCC);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    teardown_cpu(cpu);
+    // Example form Z80 Manual is broken and should be reported.
+    // 0001 0001 -> 1000 1000 (CF = 1)
+    cpu.mem[0] = 0x0F;
+    REG_A(cpu) = 0x11;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x88, REG_A(cpu));
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_C));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-START_TEST(rra_test)
+START_TEST(test_RRA)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x1f;
-    REG_A(*cpu) = 0xe1;
-    RESET_FLAG(REG_F(*cpu), FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0x70);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    teardown_cpu(cpu);
+    // Example from Z80 Manual: 1110 0001 (CF = 0) -> 0111 0000 (CF = 1)
+    cpu.mem[0] = 0x1F;
+    REG_A(cpu) = 0xE1;
+    FLAG_RST(cpu, FLAG_C);
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x70, REG_A(cpu));
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_C));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-START_TEST(cpl_test)
+START_TEST(test_CPL)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x2f;
-    REG_A(*cpu) = 0xa5;
-    execute_opcode(cpu);
-    ck_assert(REG_A(*cpu) == 0x5a);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) != 0);
-    teardown_cpu(cpu);
+    // Example from Book: 1011 0100 -> 0100 1011
+    cpu.mem[0] = 0x2F;
+    REG_A(cpu) = 0xB4;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0x4B, REG_A(cpu));
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-START_TEST(scf_test)
+START_TEST(test_SCF)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x37;
-    execute_opcode(cpu);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x37;
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_C));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-START_TEST(ccf_reset_test)
+START_TEST(test_CCF_reset)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x3f;
-    SET_FLAG(REG_F(*cpu), FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x3F;
+    FLAG_SET(cpu, FLAG_C);
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_C));
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-START_TEST(ccf_set_test)
+START_TEST(test_CCF_set)
 {
-    struct cpu_t* cpu = setup_cpu();
-    cpu->mem[0] = 0x3f;
-    RESET_FLAG(REG_F(*cpu), FLAG_C);
-    execute_opcode(cpu);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_C) != 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_H) == 0);
-    ck_assert(GET_FLAG(REG_F(*cpu), FLAG_N) == 0);
-    teardown_cpu(cpu);
+    cpu.mem[0] = 0x3F;
+    FLAG_RST(cpu, FLAG_C);
+    
+    execute_opcode(&cpu);
+    
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_C));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
 TCase* gen_x0_z7_tcase(void)
 {
-    TCase* test = tcase_create("x=0 z=7 table");
-    tcase_add_test(test, rlca_test);
-    tcase_add_test(test, rla_test);
-    tcase_add_test(test, rrca_test);
-    tcase_add_test(test, rra_test);
-    tcase_add_test(test, cpl_test);
-    tcase_add_test(test, scf_test);
-    tcase_add_test(test, ccf_reset_test);
-    tcase_add_test(test, ccf_set_test);
+    TCase* test = tcase_create("x=0, z=7");
+    tcase_add_test(test, test_RLCA);
+    tcase_add_test(test, test_RLA);
+    tcase_add_test(test, test_RRCA);
+    tcase_add_test(test, test_RRA);
+    tcase_add_test(test, test_CPL);
+    tcase_add_test(test, test_SCF);
+    tcase_add_test(test, test_CCF_reset);
+    tcase_add_test(test, test_CCF_set);
     return test;
 }

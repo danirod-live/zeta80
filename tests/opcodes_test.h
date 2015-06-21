@@ -26,9 +26,11 @@
 
 #include <cpu.h>
 
-// Setup and teardown functions for test cases.
-struct cpu_t* setup_cpu(void);
-void teardown_cpu(struct cpu_t* cpu);
+// Setup and teardown functions for test case fixtures.
+// cpu has to be global since fixture setup/teardown can't have arguments.
+struct cpu_t cpu;
+void setup_cpu(void);
+void teardown_cpu(void);
 
 // Different suites
 Suite* gensuite_opcodes(void);
@@ -40,6 +42,7 @@ TCase* gen_x0_z1_tcase(void);
 TCase* gen_x0_z2_tcase(void);
 TCase* gen_x0_z3_tcase(void);
 TCase* gen_x0_z4_tcase(void);
+TCase* gen_x0_z5_tcase(void);
 TCase* gen_x0_z6_tcase(void);
 TCase* gen_x0_z7_tcase(void);
 

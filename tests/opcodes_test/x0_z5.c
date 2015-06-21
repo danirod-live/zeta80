@@ -26,112 +26,112 @@
 
 #include "../opcodes_test.h" // Testcase definitions.
 
-START_TEST(test_INC_B)
+START_TEST(test_DEC_B)
 {
-    cpu.mem[0] = 0x04;
+    cpu.mem[0] = 0x05;
     REG_B(cpu) = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, REG_B(cpu));
+    ck_assert_uint_eq(0x11, REG_B(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_C)
+START_TEST(test_DEC_C)
 {
-    cpu.mem[0] = 0x0C;
+    cpu.mem[0] = 0x0D;
     REG_C(cpu) = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, REG_C(cpu));
+    ck_assert_uint_eq(0x11, REG_C(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_D)
+START_TEST(test_DEC_D)
 {
-    cpu.mem[0] = 0x14;
+    cpu.mem[0] = 0x15;
     REG_D(cpu) = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, REG_D(cpu));
+    ck_assert_uint_eq(0x11, REG_D(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_E)
+START_TEST(test_DEC_E)
 {
-    cpu.mem[0] = 0x1C;
+    cpu.mem[0] = 0x1D;
     REG_E(cpu) = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, REG_E(cpu));
+    ck_assert_uint_eq(0x11, REG_E(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_H)
+START_TEST(test_DEC_H)
 {
-    cpu.mem[0] = 0x24;
+    cpu.mem[0] = 0x25;
     REG_H(cpu) = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, REG_H(cpu));
+    ck_assert_uint_eq(0x11, REG_H(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_L)
+START_TEST(test_DEC_L)
 {
-    cpu.mem[0] = 0x2C;
+    cpu.mem[0] = 0x2D;
     REG_L(cpu) = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, REG_L(cpu));
+    ck_assert_uint_eq(0x11, REG_L(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_iHL)
+START_TEST(test_DEC_iHL)
 {
-    cpu.mem[0] = 0x34;
+    cpu.mem[0] = 0x35;
     REG_HL(cpu) = 0x8000;
     cpu.mem[0x8000] = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, cpu.mem[0x8000]);
+    ck_assert_uint_eq(0x11, cpu.mem[0x8000]);
     ck_assert_uint_eq(11, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_A)
+START_TEST(test_DEC_A)
 {
-    cpu.mem[0] = 0x3C;
+    cpu.mem[0] = 0x3D;
     REG_A(cpu) = 0x12;
     
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0x13, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_INC_r8_sf)
+START_TEST(test_DEC_r8_sf)
 {
-    cpu.mem[0] = 0x04;
+    cpu.mem[0] = 0x05;
     byte val = 0;
     do {
         REG_B(cpu) = val;
         PC(cpu) = 0;
         execute_opcode(&cpu);
-        if ((val + 1) & 0x80) {
+        if ((val - 1) & 0x80) {
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_S));
         } else {
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_S));
@@ -141,15 +141,15 @@ START_TEST(test_INC_r8_sf)
 }
 END_TEST
 
-START_TEST(test_INC_r8_zf)
+START_TEST(test_DEC_r8_zf)
 {
-    cpu.mem[0] = 0x04;
+    cpu.mem[0] = 0x05;
     byte val = 0;
     do {
         REG_B(cpu) = val;
         PC(cpu) = 0;
         execute_opcode(&cpu);
-        if (val == 0xFF) {
+        if (val == 0x01) {
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_Z));
         } else {
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_Z));
@@ -159,15 +159,15 @@ START_TEST(test_INC_r8_zf)
 }
 END_TEST
 
-START_TEST(test_INC_r8_hf)
+START_TEST(test_DEC_r8_hf)
 {
-    cpu.mem[0] = 0x04;
+    cpu.mem[0] = 0x05;
     byte val = 0;
     do {
         REG_B(cpu) = val;
         PC(cpu) = 0;
         execute_opcode(&cpu);
-        if (val & 0x0F) {
+        if (((val - 1) & 0x0F) == 0x0F) {
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_H));
         } else {
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
@@ -177,15 +177,15 @@ START_TEST(test_INC_r8_hf)
 }
 END_TEST
 
-START_TEST(test_INC_r8_vf)
+START_TEST(test_DEC_r8_vf)
 {
-    cpu.mem[0] = 0x04;
+    cpu.mem[0] = 0x05;
     byte val = 0x00;
     do {
         REG_B(cpu) = val;
         PC(cpu) = 0;
         execute_opcode(&cpu);
-        if (val == 0x7F)
+        if (val == 0x80)
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_P));
         else
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_P));
@@ -194,34 +194,34 @@ START_TEST(test_INC_r8_vf)
 }
 END_TEST
 
-START_TEST(test_INC_r8_daa)
+START_TEST(test_DEC_r8_daa)
 {
-    cpu.mem[0] = 0x04;
+    cpu.mem[0] = 0x05;
     REG_B(cpu) = 0x12;
-
+    
     execute_opcode(&cpu);
     
-    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_N));
+    ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_N));
 }
 END_TEST
 
-TCase* gen_x0_z4_tcase(void)
+TCase* gen_x0_z5_tcase(void)
 {
-    TCase* test = tcase_create("x=0, z=4");
-    tcase_add_test(test, test_INC_B);
-    tcase_add_test(test, test_INC_C);
-    tcase_add_test(test, test_INC_D);
-    tcase_add_test(test, test_INC_E);
-    tcase_add_test(test, test_INC_H);
-    tcase_add_test(test, test_INC_L);
-    tcase_add_test(test, test_INC_iHL);
-    tcase_add_test(test, test_INC_A);
+    TCase* test = tcase_create("x=0, z=5");
+    tcase_add_test(test, test_DEC_B);
+    tcase_add_test(test, test_DEC_C);
+    tcase_add_test(test, test_DEC_D);
+    tcase_add_test(test, test_DEC_E);
+    tcase_add_test(test, test_DEC_H);
+    tcase_add_test(test, test_DEC_L);
+    tcase_add_test(test, test_DEC_iHL);
+    tcase_add_test(test, test_DEC_A);
     
-    tcase_add_test(test, test_INC_r8_sf);
-    tcase_add_test(test, test_INC_r8_zf);
-    tcase_add_test(test, test_INC_r8_hf);
-    tcase_add_test(test, test_INC_r8_vf);
-    tcase_add_test(test, test_INC_r8_daa);
-
+    tcase_add_test(test, test_DEC_r8_sf);
+    tcase_add_test(test, test_DEC_r8_zf);
+    tcase_add_test(test, test_DEC_r8_hf);
+    tcase_add_test(test, test_DEC_r8_vf);
+    tcase_add_test(test, test_DEC_r8_daa);
+    
     return test;
 }

@@ -243,25 +243,32 @@ static void
 inc_r8(struct cpu_t* cpu, int index)
 {
     byte* val = r(cpu, index);
-
-    SET_IF(REG_F(*cpu), FLAG_H, (*val & 0xF) == 0xF);
-    SET_IF(REG_F(*cpu), FLAG_P, (*val == 0x7F));
-
+    FLAG_SIF(*cpu, FLAG_H, (*val & 0xF));
+    FLAG_SIF(*cpu, FLAG_P, (*val == 0x7F));
+    
     (*val)++;
+    
+    FLAG_SIF(*cpu, FLAG_S, (*val & 0x80));
+    FLAG_SIF(*cpu, FLAG_Z, (*val == 0));
+    FLAG_RST(*cpu, FLAG_N);
 
-    SET_IF(REG_F(*cpu), FLAG_S, (*val & 0x80) != 0);
-    SET_IF(REG_F(*cpu), FLAG_Z, *val == 0);
-    RESET_FLAG(REG_F(*cpu), FLAG_N);
-
-    cpu->tstates += 4;
+    cpu->tstates += (index == 6 ? 11 : 4);
 }
 
 static void
 dec_r8(struct cpu_t* cpu, int index)
 {
     byte* val = r(cpu, index);
+    FLAG_SIF(*cpu, FLAG_P, (*val == 0x80));
+    
     (*val)--;
-    cpu->tstates += 4;
+    
+    FLAG_SIF(*cpu, FLAG_S, (*val & 0x80));
+    FLAG_SIF(*cpu, FLAG_Z, (*val == 0));
+    FLAG_SIF(*cpu, FLAG_H, (*val & 0xF) == 0xF);
+    FLAG_SET(*cpu, FLAG_N);
+    
+    cpu->tstates += (index == 6 ? 11 : 4);
 }
 
 static void
@@ -290,10 +297,8 @@ static void
 rrca(struct cpu_t* cpu)
 {
     byte bit0 = REG_A(*cpu) & 1;
-    REG_A(*cpu) >>= 1;
-    REG_A(*cpu) &= 0x7F;
-    REG_A(*cpu) |= (bit0 ? 0x80 : 0x00);
-    SET_IF(REG_F(*cpu), FLAG_C, (bit0 != 0));
+    REG_A(*cpu) = ((REG_A(*cpu) >> 1) & 0x7F) | (bit0 << 7);
+    SET_IF(REG_F(*cpu), FLAG_C, bit0);
     RESET_FLAG(REG_F(*cpu), FLAG_H);
     RESET_FLAG(REG_F(*cpu), FLAG_N);
     cpu->tstates += 4;
