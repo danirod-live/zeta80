@@ -32,120 +32,129 @@
  * inside that function.
  */
 
-START_TEST(test_SUB_A_B)
+START_TEST(test_SBC_A_B)
 {
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     REG_A(cpu) = 0x46;
     REG_B(cpu) = 0x34;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x12, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_C)
+START_TEST(test_SBC_A_C)
 {
-    cpu.mem[0] = 0x91;
+    cpu.mem[0] = 0x99;
     REG_A(cpu) = 0x46;
     REG_C(cpu) = 0x34;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x12, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_D)
+START_TEST(test_SBC_A_D)
 {
-    cpu.mem[0] = 0x92;
+    cpu.mem[0] = 0x9A;
     REG_A(cpu) = 0x46;
     REG_D(cpu) = 0x34;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x12, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_E)
+START_TEST(test_SBC_A_E)
 {
-    cpu.mem[0] = 0x93;
+    cpu.mem[0] = 0x9B;
     REG_A(cpu) = 0x46;
     REG_E(cpu) = 0x34;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x12, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_H)
+START_TEST(test_SBC_A_H)
 {
-    cpu.mem[0] = 0x94;
+    cpu.mem[0] = 0x9C;
     REG_A(cpu) = 0x46;
     REG_H(cpu) = 0x34;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x12, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_L)
+START_TEST(test_SBC_A_L)
 {
-    cpu.mem[0] = 0x95;
+    cpu.mem[0] = 0x9D;
     REG_A(cpu) = 0x46;
     REG_L(cpu) = 0x34;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x12, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_iHL)
+START_TEST(test_SBC_A_iHL)
 {
-    cpu.mem[0] = 0x96;
+    cpu.mem[0] = 0x9E;
     REG_A(cpu) = 0x46;
     REG_HL(cpu) = 0x8000;
     cpu.mem[0x8000] = 0x34;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x12, REG_A(cpu));
+    ck_assert_uint_eq(0x11, REG_A(cpu));
     ck_assert_uint_eq(7, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_A)
+START_TEST(test_SBC_A_A)
 {
-    cpu.mem[0] = 0x97;
+    cpu.mem[0] = 0x9F;
     REG_A(cpu) = 0x24;
+    FLAG_SET(cpu, FLAG_C);
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0, REG_A(cpu));
+    ck_assert_uint_eq(0xFF, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
 
-START_TEST(test_SUB_A_sf)
+START_TEST(test_SBC_A_sf)
 {
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     byte val = 0;
     do {
         PC(cpu) = 0;
         REG_A(cpu) = 0x50;
         REG_B(cpu) = val;
+        FLAG_SET(cpu, FLAG_C);
         execute_opcode(&cpu);
-        if ((0x50 - val) & 0x80)
+        if ((0x50 - val - 1) & 0x80)
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_S));
         else
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_S));
@@ -154,16 +163,17 @@ START_TEST(test_SUB_A_sf)
 }
 END_TEST
 
-START_TEST(test_SUB_A_zf)
+START_TEST(test_SBC_A_zf)
 {
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     byte val = 0;
     do {
         PC(cpu) = 0;
         REG_A(cpu) = 0x80;
         REG_B(cpu) = val;
+        FLAG_SET(cpu, FLAG_C);
         execute_opcode(&cpu);
-        if (((0x80 - val) & 0xFF) == 0)
+        if (((0x80 - val - 1) & 0xFF) == 0)
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_Z));
         else
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_Z));
@@ -172,16 +182,17 @@ START_TEST(test_SUB_A_zf)
 }
 END_TEST
 
-START_TEST(test_SUB_A_hf)
+START_TEST(test_SBC_A_hf)
 {
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     byte val = 0;
     do {
         PC(cpu) = 0;
         REG_A(cpu) = 0x55;
         REG_B(cpu) = val;
+        FLAG_SET(cpu, FLAG_C);
         execute_opcode(&cpu);
-        if (0x5 < (val & 0xF))
+        if (0x5 < ((val + 1) & 0xF))
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_H));
         else
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
@@ -190,38 +201,41 @@ START_TEST(test_SUB_A_hf)
 }
 END_TEST
 
-START_TEST(test_SUB_A_vf_set)
+START_TEST(test_SBC_A_vf_set)
 {
     // 127 - -64 should give overflow as Z80 Manual.
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     REG_A(cpu) = 0x7F; // 127
     REG_B(cpu) = 0xC0; // -64
+    FLAG_SET(cpu, FLAG_C);
     execute_opcode(&cpu);
     ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_P));
 }
 END_TEST
 
-START_TEST(test_SUB_A_vf_rst)
+START_TEST(test_SBC_A_vf_rst)
 {
     // 0x40 + 0x30 should not give overflow.
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     REG_A(cpu) = 0x40;
     REG_B(cpu) = 0x30;
+    FLAG_SET(cpu, FLAG_C);
     execute_opcode(&cpu);
     ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_P));
 }
 END_TEST
 
-START_TEST(test_SUB_A_cf)
+START_TEST(test_SBC_A_cf)
 {
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     byte val = 0;
     do {
         PC(cpu) = 0;
         REG_A(cpu) = 0x55;
         REG_B(cpu) = val;
+        FLAG_SET(cpu, FLAG_C);
         execute_opcode(&cpu);
-        if (0x55 < val)
+        if (0x55 < (val + 1))
             ck_assert_uint_ne(0, FLAG_GET(cpu, FLAG_C));
         else
             ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_C));
@@ -230,9 +244,9 @@ START_TEST(test_SUB_A_cf)
 }
 END_TEST
 
-START_TEST(test_SUB_A_daa)
+START_TEST(test_SBC_A_daa)
 {
-    cpu.mem[0] = 0x90;
+    cpu.mem[0] = 0x98;
     REG_A(cpu) = 0x46;
     REG_B(cpu) = 0x34;
     execute_opcode(&cpu);
@@ -240,24 +254,24 @@ START_TEST(test_SUB_A_daa)
 }
 END_TEST
 
-TCase* gen_x2_z2_tcase()
+TCase* gen_x2_z3_tcase()
 {
-    TCase* test = tcase_create("x=2, z=2");
+    TCase* test = tcase_create("x=2, z=3");
     tcase_add_checked_fixture(test, setup_cpu, teardown_cpu);
-    tcase_add_test(test, test_SUB_A_B);
-    tcase_add_test(test, test_SUB_A_C);
-    tcase_add_test(test, test_SUB_A_D);
-    tcase_add_test(test, test_SUB_A_E);
-    tcase_add_test(test, test_SUB_A_H);
-    tcase_add_test(test, test_SUB_A_L);
-    tcase_add_test(test, test_SUB_A_iHL);
-    tcase_add_test(test, test_SUB_A_A);
-    tcase_add_test(test, test_SUB_A_sf);
-    tcase_add_test(test, test_SUB_A_zf);
-    tcase_add_test(test, test_SUB_A_hf);
-    tcase_add_test(test, test_SUB_A_vf_set);
-    tcase_add_test(test, test_SUB_A_vf_rst);
-    tcase_add_test(test, test_SUB_A_cf);
-    tcase_add_test(test, test_SUB_A_daa);
+    tcase_add_test(test, test_SBC_A_B);
+    tcase_add_test(test, test_SBC_A_C);
+    tcase_add_test(test, test_SBC_A_D);
+    tcase_add_test(test, test_SBC_A_E);
+    tcase_add_test(test, test_SBC_A_H);
+    tcase_add_test(test, test_SBC_A_L);
+    tcase_add_test(test, test_SBC_A_iHL);
+    tcase_add_test(test, test_SBC_A_A);
+    tcase_add_test(test, test_SBC_A_sf);
+    tcase_add_test(test, test_SBC_A_zf);
+    tcase_add_test(test, test_SBC_A_hf);
+    tcase_add_test(test, test_SBC_A_vf_set);
+    tcase_add_test(test, test_SBC_A_vf_rst);
+    tcase_add_test(test, test_SBC_A_cf);
+    tcase_add_test(test, test_SBC_A_daa);
     return test;
 }

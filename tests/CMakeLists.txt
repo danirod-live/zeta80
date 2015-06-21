@@ -60,6 +60,12 @@ set(ZETA80_TEST_SRC
     opcodes_test/x2_z0.c
     opcodes_test/x2_z1.c
     opcodes_test/x2_z2.c
+    opcodes_test/x2_z3.c
+    opcodes_test/x2_z4.c
+    opcodes_test/x2_z5.c
+    opcodes_test/x2_z6.c
+    opcodes_test/x2_z7.c
+    opcodes_test/x3_z0.c
     )
 
 set(ZETA80_TEST_INCLUDE

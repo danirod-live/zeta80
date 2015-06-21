@@ -70,5 +70,11 @@ gensuite_opcodes(void)
     suite_add_tcase(s, gen_x2_z0_tcase());
     suite_add_tcase(s, gen_x2_z1_tcase());
     suite_add_tcase(s, gen_x2_z2_tcase());
+    suite_add_tcase(s, gen_x2_z3_tcase());
+    suite_add_tcase(s, gen_x2_z4_tcase());
+    suite_add_tcase(s, gen_x2_z5_tcase());
+    suite_add_tcase(s, gen_x2_z6_tcase());
+    suite_add_tcase(s, gen_x2_z7_tcase());
+    suite_add_tcase(s, gen_x3_z0_tcase());
     return s;
 }
