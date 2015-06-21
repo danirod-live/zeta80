@@ -208,6 +208,7 @@ END_TEST
 TCase* gen_x0_z4_tcase(void)
 {
     TCase* test = tcase_create("x=0, z=4");
+    tcase_add_checked_fixture(test, setup_cpu, teardown_cpu);
     tcase_add_test(test, test_INC_B);
     tcase_add_test(test, test_INC_C);
     tcase_add_test(test, test_INC_D);

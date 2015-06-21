@@ -333,6 +333,7 @@ END_TEST
 TCase* gen_x0_z1_tcase(void)
 {
     TCase* test = tcase_create("x=0, z=1");
+    tcase_add_checked_fixture(test, setup_cpu, teardown_cpu);
     tcase_add_test(test, test_LC_BC_NN);
     tcase_add_test(test, test_LD_DE_NN);
     tcase_add_test(test, test_LD_HL_NN);

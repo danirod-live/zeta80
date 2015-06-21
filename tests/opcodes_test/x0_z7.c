@@ -144,6 +144,7 @@ END_TEST
 TCase* gen_x0_z7_tcase(void)
 {
     TCase* test = tcase_create("x=0, z=7");
+    tcase_add_checked_fixture(test, setup_cpu, teardown_cpu);
     tcase_add_test(test, test_RLCA);
     tcase_add_test(test, test_RLA);
     tcase_add_test(test, test_RRCA);

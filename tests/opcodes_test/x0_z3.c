@@ -125,6 +125,7 @@ END_TEST
 TCase* gen_x0_z3_tcase(void)
 {
     TCase* test = tcase_create("x=0, z=3");
+    tcase_add_checked_fixture(test, setup_cpu, teardown_cpu);
     tcase_add_test(test, test_INC_BC);
     tcase_add_test(test, test_INC_DE);
     tcase_add_test(test, test_INC_HL);

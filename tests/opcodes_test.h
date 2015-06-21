@@ -45,5 +45,13 @@ TCase* gen_x0_z4_tcase(void);
 TCase* gen_x0_z5_tcase(void);
 TCase* gen_x0_z6_tcase(void);
 TCase* gen_x0_z7_tcase(void);
+TCase* gen_x1_z0_tcase(void);
+TCase* gen_x1_z1_tcase(void);
+TCase* gen_x1_z2_tcase(void);
+TCase* gen_x1_z3_tcase(void);
+TCase* gen_x1_z4_tcase(void);
+TCase* gen_x1_z5_tcase(void);
+TCase* gen_x1_z6_tcase(void);
+TCase* gen_x1_z7_tcase(void);
 
 #endif // OPCODES_TEST_H_

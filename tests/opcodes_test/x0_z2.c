@@ -140,6 +140,7 @@ END_TEST
 TCase* gen_x0_z2_tcase(void)
 {
     TCase* test = tcase_create("x=0, z=2");
+    tcase_add_checked_fixture(test, setup_cpu, teardown_cpu);
     tcase_add_test(test, test_LD_iBC_A);
     tcase_add_test(test, test_LD_iDE_A);
     tcase_add_test(test, test_LD_A_iBC);
