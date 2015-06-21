@@ -245,9 +245,9 @@ inc_r8(struct cpu_t* cpu, int index)
     byte* val = r(cpu, index);
     FLAG_SIF(*cpu, FLAG_H, (*val & 0xF));
     FLAG_SIF(*cpu, FLAG_P, (*val == 0x7F));
-    
+
     (*val)++;
-    
+
     FLAG_SIF(*cpu, FLAG_S, (*val & 0x80));
     FLAG_SIF(*cpu, FLAG_Z, (*val == 0));
     FLAG_RST(*cpu, FLAG_N);
@@ -260,14 +260,14 @@ dec_r8(struct cpu_t* cpu, int index)
 {
     byte* val = r(cpu, index);
     FLAG_SIF(*cpu, FLAG_P, (*val == 0x80));
-    
+
     (*val)--;
-    
+
     FLAG_SIF(*cpu, FLAG_S, (*val & 0x80));
     FLAG_SIF(*cpu, FLAG_Z, (*val == 0));
     FLAG_SIF(*cpu, FLAG_H, (*val & 0xF) == 0xF);
     FLAG_SET(*cpu, FLAG_N);
-    
+
     cpu->tstates += (index == 6 ? 11 : 4);
 }
 
@@ -468,45 +468,107 @@ execute_table0(struct cpu_t* cpu, struct opcode_t* opstruct)
 }
 
 static void
-add_a(struct cpu_t* cpu, int z) {
+add_a(struct cpu_t* cpu, int z)
+{
     byte* zz = r(cpu, z);
+    byte old_a = REG_A(*cpu);
+    char same_sign = ((old_a ^ *zz) & 0x80) == 0;
+
+    FLAG_SIF(*cpu, FLAG_H, ((old_a & 0xF) + (*zz & 0xF)) & 0x10);
+    FLAG_SIF(*cpu, FLAG_C, (old_a + *zz) & 0x100);
+
     REG_A(*cpu) += *zz;
-    cpu->tstates += 7;
-    SET_IF(REG_F(*cpu), FLAG_S, (REG_A(*cpu) & 0x80) != 0);
-    SET_IF(REG_F(*cpu), FLAG_Z, REG_A(*cpu) == 0);
-    // TODO: FLAG_H
-    // TODO: FLAG_P
-    RESET_FLAG(REG_F(*cpu), FLAG_N);
-    // TODO: FLAG_C
+
+    /*
+     * H: Set if A last nibble + zz last nibble overflows.
+     * C: Set if A + zz overflows.
+     * Z: Set if A + zz == 0
+     * S: Set if A + zz < 0 (bit 7 ON)
+     * V: Set if both operands positive and result negative; or
+     *        if both operands negative and result positive
+     * N: Always unset.
+     */
+    FLAG_SIF(*cpu, FLAG_S, (REG_A(*cpu) & 0x80) != 0);
+    FLAG_SIF(*cpu, FLAG_Z, REG_A(*cpu) == 0);
+    FLAG_RST(*cpu, FLAG_N);
+    FLAG_SIF(*cpu, FLAG_P, same_sign && ((REG_A(*cpu) ^ old_a) & 0x80));
+
+    cpu->tstates += (z == 6 ? 7 : 4);
 }
 
 static void
-adc_a(struct cpu_t* cpu, int z) {
+adc_a(struct cpu_t* cpu, int z)
+{
     byte* zz = r(cpu, z);
-    REG_A(*cpu) += *zz;
-    if (GET_FLAG(REG_F(*cpu), FLAG_C) != 0) {
-        REG_A(*cpu)++;
-    }
-    cpu->tstates += 7;
-    SET_IF(REG_F(*cpu), FLAG_S, (REG_A(*cpu) & 0x80) != 0);
-    SET_IF(REG_F(*cpu), FLAG_Z, REG_A(*cpu) == 0);
-    // TODO: FLAG_H
-    // TODO: FLAG_P
-    RESET_FLAG(REG_F(*cpu), FLAG_N);
-    // TODO: FLAG_C
+    byte old_a = REG_A(*cpu);
+    char carry = FLAG_GET(*cpu, FLAG_C) != 0;
+    char same_sign = ((REG_A(*cpu) ^ (*zz + carry)) & 0x80) == 0;
+
+    FLAG_SIF(*cpu, FLAG_H, (((old_a & 0xF) + (*zz & 0xF) + carry) & 0xF0));
+    FLAG_SIF(*cpu, FLAG_C, (old_a + (*zz + carry)) & 0x100);
+
+    REG_A(*cpu) += *zz + carry;
+
+    /*
+     * H: Set if A last nibble + zz + last nibble + CF overflows.
+     * C: Set if A + zz + CF overflows.
+     * Z: Set if A + zz + CF == 0
+     * S: Set if A + zz + CF < 0 (bit 7 ON)
+     * V: Set if both operands + CF positive and result negative;
+     *     or if both operands + CF negative and result positive
+     * N: Always unset.
+     */
+    FLAG_SIF(*cpu, FLAG_S, (REG_A(*cpu) & 0x80) != 0);
+    FLAG_SIF(*cpu, FLAG_Z, REG_A(*cpu) == 0);
+    FLAG_RST(*cpu, FLAG_N);
+    FLAG_SIF(*cpu, FLAG_P, same_sign && ((REG_A(*cpu) ^ old_a) & 0x80));
+
+    cpu->tstates += (z == 6 ? 7 : 4);
 }
 
 static void
-sub_a(struct cpu_t* cpu, int z) {
+sub_a(struct cpu_t* cpu, int z)
+{
+    /*
+     * H: Set if borrow from bit 4.
+     * C: Set if borrow:
+     * Z: Set if A - zz == 0
+     * S: Set if A - zz < 0 (bit 7 ON)
+     * V: Set if
+     *     or if
+     * N: Always set.
+     */
     byte* zz = r(cpu, z);
+    byte old_a = REG_A(*cpu);
+    byte old_b = *zz;
+    char same_sign = ((old_a ^ *zz) & 0x80) == 0;
+
+    FLAG_SIF(*cpu, FLAG_H, (((old_a & 0xF) - (old_b & 0xF)) & 0xF00) != 0);
+    FLAG_SIF(*cpu, FLAG_C, old_a < old_b);
+
     REG_A(*cpu) -= *zz;
-    cpu->tstates += 7;
-    SET_IF(REG_F(*cpu), FLAG_S, (REG_A(*cpu) & 0x80) != 0);
-    SET_IF(REG_F(*cpu), FLAG_Z, REG_A(*cpu) == 0);
-    // TODO: FLAG_H
-    // TODO: FLAG_P
-    SET_FLAG(REG_F(*cpu), FLAG_N);
-    // TODO: FLAG_C
+
+    FLAG_SIF(*cpu, FLAG_S, (REG_A(*cpu) & 0x80) != 0);
+    FLAG_SIF(*cpu, FLAG_Z, REG_A(*cpu) == 0);
+    FLAG_SET(*cpu, FLAG_N);
+    FLAG_SIF(*cpu, FLAG_P, !same_sign && (((REG_A(*cpu) ^ old_b) & 0x80) == 0));
+
+    cpu->tstates += (z == 6 ? 7 : 4);
+}
+
+static void
+sbc_a(struct cpu_t* cpu, int z)
+{
+    /*
+     * H: Set if borrow from bit 4
+     * C: Set if borrow
+     * Z: Set if A - zz - CF == 0
+     * S: Set if A - zz - CF < 0 (bit 7 ON)
+     * V: Set if
+     *     or if
+     * N: Always set
+     */
+    // TODO: Implement opcode.
 }
 
 static void
@@ -532,6 +594,8 @@ execute_table2(struct cpu_t* cpu, struct opcode_t* opstruct)
         case 2:
             sub_a(cpu, opstruct->z);
             break;
+        case 3:
+            sbc_a(cpu, opstruct->z);
     }
 }
 
