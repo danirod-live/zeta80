@@ -197,7 +197,7 @@ START_TEST(test_AND_A_cf)
     REG_A(cpu) = 0x55;
     REG_B(cpu) = 0x22;
     execute_opcode(&cpu);
-    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_C));
 }
 END_TEST
 

@@ -40,7 +40,7 @@ START_TEST(test_XOR_A_B)
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x0A, REG_A(cpu));
+    ck_assert_uint_eq(0x05, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
@@ -54,7 +54,7 @@ START_TEST(test_XOR_A_C)
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x0A, REG_A(cpu));
+    ck_assert_uint_eq(0x05, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
@@ -68,7 +68,7 @@ START_TEST(test_XOR_A_D)
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x0A, REG_A(cpu));
+    ck_assert_uint_eq(0x05, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
@@ -82,7 +82,7 @@ START_TEST(test_XOR_A_E)
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x0A, REG_A(cpu));
+    ck_assert_uint_eq(0x05, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
@@ -96,7 +96,7 @@ START_TEST(test_XOR_A_H)
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x0A, REG_A(cpu));
+    ck_assert_uint_eq(0x05, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
@@ -110,7 +110,7 @@ START_TEST(test_XOR_A_L)
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x0A, REG_A(cpu));
+    ck_assert_uint_eq(0x05, REG_A(cpu));
     ck_assert_uint_eq(4, cpu.tstates);
 }
 END_TEST
@@ -125,7 +125,7 @@ START_TEST(test_XOR_A_iHL)
 
     execute_opcode(&cpu);
 
-    ck_assert_uint_eq(0x0A, REG_A(cpu));
+    ck_assert_uint_eq(0x05, REG_A(cpu));
     ck_assert_uint_eq(7, cpu.tstates);
 }
 END_TEST
@@ -197,7 +197,7 @@ START_TEST(test_XOR_A_cf)
     REG_A(cpu) = 0x55;
     REG_B(cpu) = 0x22;
     execute_opcode(&cpu);
-    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_H));
+    ck_assert_uint_eq(0, FLAG_GET(cpu, FLAG_C));
 }
 END_TEST
 

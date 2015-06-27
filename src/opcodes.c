@@ -568,7 +568,87 @@ sbc_a(struct cpu_t* cpu, int z)
      *     or if
      * N: Always set
      */
-    // TODO: Implement opcode.
+    byte* zz = r(cpu, z);
+    byte old_a = REG_A(*cpu);
+    byte old_b = *zz;
+    char carry = (FLAG_GET(*cpu, FLAG_C) != 0);
+    char same_sign = ((old_a ^ (*zz - carry)) & 0x80) == 0;
+
+    FLAG_SIF(*cpu, FLAG_H, (((old_a & 0xF) - ((old_b + carry) & 0xF)) & 0xF00) != 0);
+    FLAG_SIF(*cpu, FLAG_C, old_a < (old_b + carry));
+
+    REG_A(*cpu) -= (*zz + carry);
+
+    FLAG_SIF(*cpu, FLAG_S, (REG_A(*cpu) & 0x80) != 0);
+    FLAG_SIF(*cpu, FLAG_Z, REG_A(*cpu) == 0);
+    FLAG_SET(*cpu, FLAG_N);
+    FLAG_SIF(*cpu, FLAG_P, !same_sign && (((REG_A(*cpu) ^ old_b) & 0x80) == 0));
+
+    cpu->tstates += (z == 6 ? 7 : 4);
+}
+
+static void
+and_a(struct cpu_t* cpu, int z)
+{
+    byte* zz = r(cpu, z);
+    REG_A(*cpu) &= *zz;
+
+    FLAG_SIF(*cpu, FLAG_S, REG_A(*cpu) & 0x80);
+    FLAG_SIF(*cpu, FLAG_Z, REG_A(*cpu) == 0);
+    FLAG_SET(*cpu, FLAG_H);
+    FLAG_RST(*cpu, FLAG_N);
+    FLAG_RST(*cpu, FLAG_C);
+
+    cpu->tstates += (z == 6 ? 7 : 4);
+}
+
+static void
+xor_a(struct cpu_t* cpu, int z)
+{
+    byte* zz = r(cpu, z);
+    REG_A(*cpu) ^= *zz;
+
+    FLAG_SIF(*cpu, FLAG_S, REG_A(*cpu) & 0x80);
+    FLAG_SIF(*cpu, FLAG_Z, REG_A(*cpu) == 0);
+    FLAG_RST(*cpu, FLAG_H);
+    FLAG_RST(*cpu, FLAG_N);
+    FLAG_RST(*cpu, FLAG_C);
+
+    cpu->tstates += (z == 6 ? 7 : 4);
+}
+
+static void
+or_a(struct cpu_t* cpu, int z)
+{
+    byte* zz = r(cpu, z);
+    REG_A(*cpu) |= *zz;
+
+    FLAG_SIF(*cpu, FLAG_S, REG_A(*cpu) & 0x80);
+    FLAG_SIF(*cpu, FLAG_Z, REG_A(*cpu) == 0);
+    FLAG_RST(*cpu, FLAG_H);
+    FLAG_RST(*cpu, FLAG_N);
+    FLAG_RST(*cpu, FLAG_C);
+
+    cpu->tstates += (z == 6 ? 7 : 4);
+}
+
+static void
+cp_a(struct cpu_t* cpu, int z)
+{
+    byte* zz = r(cpu, z);
+    char same_sign = ((REG_A(*cpu) ^ *zz) & 0x80) == 0;
+
+    FLAG_SIF(*cpu, FLAG_H, (((REG_A(*cpu) & 0xF) - (*zz & 0xF)) & 0xF00) != 0);
+    FLAG_SIF(*cpu, FLAG_C, REG_A(*cpu) < *zz);
+
+    byte comparado = REG_A(*cpu) - *zz;
+
+    FLAG_SIF(*cpu, FLAG_S, (comparado & 0x80) != 0);
+    FLAG_SIF(*cpu, FLAG_Z, comparado == 0);
+    FLAG_SET(*cpu, FLAG_N);
+    FLAG_SIF(*cpu, FLAG_P, !same_sign && (((comparado ^ *zz) & 0x80) == 0));
+
+    cpu->tstates += (z == 6 ? 7 : 4);
 }
 
 static void
@@ -596,12 +676,87 @@ execute_table2(struct cpu_t* cpu, struct opcode_t* opstruct)
             break;
         case 3:
             sbc_a(cpu, opstruct->z);
+            break;
+        case 4:
+            and_a(cpu, opstruct->z);
+            break;
+        case 5:
+            xor_a(cpu, opstruct->z);
+            break;
+        case 6:
+            or_a(cpu, opstruct->z);
+            break;
+        case 7:
+            cp_a(cpu, opstruct->z);
+    }
+}
+
+// RET NZ
+static void
+ret_nz(struct cpu_t* cpu)
+{
+    if (FLAG_GET(*cpu, FLAG_Z) == 0) {
+        printf("WAT");
+        PC(*cpu) = cpu->mem[SP(*cpu) + 1] | cpu->mem[SP(*cpu)];
+        SP(*cpu) += 2;
+        cpu->tstates += 11;
+    } else {
+        printf("LOL");
+        cpu->tstates += 5;
+    }
+}
+
+// RET Z
+static void
+ret_z(struct cpu_t* cpu)
+{
+    if (FLAG_GET(*cpu, FLAG_Z)) {
+        PC(*cpu) = cpu->mem[SP(*cpu) + 1] | cpu->mem[SP(*cpu)];
+        SP(*cpu) += 2;
+        cpu->tstates += 11;
+    } else {
+        cpu->tstates += 5;
+    }
+}
+
+// RET NC
+static void
+ret_nc(struct cpu_t* cpu)
+{
+    if (FLAG_GET(*cpu, FLAG_C) == 0) {
+        PC(*cpu) = cpu->mem[SP(*cpu) + 1] | cpu->mem[SP(*cpu)];
+        SP(*cpu) += 2;
+        cpu->tstates += 11;
+    } else {
+        cpu->tstates += 5;
+    }
+}
+
+// RET C
+static void
+ret_c(struct cpu_t* cpu)
+{
+    if (FLAG_GET(*cpu, FLAG_C)) {
+        PC(*cpu) = cpu->mem[SP(*cpu) + 1] | cpu->mem[SP(*cpu)];
+        SP(*cpu) += 2;
+        cpu->tstates += 11;
+    } else {
+        cpu->tstates += 5;
     }
 }
 
 static void
 execute_table3(struct cpu_t* cpu, struct opcode_t* opstruct)
 {
+    switch (opstruct->z)
+    {
+        case 0:
+            if (opstruct->y == 0) ret_nz(cpu);
+            if (opstruct->y == 1) ret_z(cpu);
+            if (opstruct->y == 2) ret_nc(cpu);
+            if (opstruct->y == 3) ret_c(cpu);
+            break;
+    }
 }
 
 
